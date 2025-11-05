@@ -1,109 +1,276 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Nutrition App - Monolith Architecture
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+AI-Powered Recipe & Nutrition Analysis Application built with FastAPI backend and Next.js frontend.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+## 🎯 Project Overview
 
-## Features
+This application allows users to:
+- 📸 Take photos of dishes to get AI-calculated calories and nutrition specs
+- 🥗 Upload ingredient photos to receive step-by-step cooking recipes
+- 🍽️ Set dietary restrictions and preferences (vegan, gluten-free, keto, etc.)
+- 🔍 Search recipes using vector-based semantic search
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+## 🏗️ Architecture
 
-## Demo
+**Monolith deployment** on Vercel with:
+- **Backend**: Python FastAPI + Supabase + Redis + RabbitMQ
+- **Frontend**: Next.js 15+ App Router + Tailwind CSS + shadcn/ui
+- **AI**: Groq API for recipe generation and nutrition analysis
+- **Database**: Supabase (Postgres + Auth + Storage + pgvector)
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+## 📐 Design Patterns (10 Implemented)
 
-## Deploy to Vercel
+### Creational (3)
+1. **Singleton** - Configuration and Database Manager
+2. **Factory** - Service creation functions
+3. **Builder** - Pydantic models with validation
 
-Vercel deployment will guide you through creating a Supabase account and project.
+### Structural (3)
+4. **Facade** - Authentication service simplifying Supabase operations
+5. **Adapter** - API client adapting fetch to typed interface
+6. **Decorator** - (Planned) Nutrition calculation decorators
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+### Behavioral (3)
+7. **Chain of Responsibility** - Authentication middleware layers
+8. **Strategy** - (Planned) Different image analysis strategies
+9. **Observer** - (Planned) Real-time recipe updates
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+### Bonus (1)
+10. **Repository** - (Planned) Data access abstraction
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+## 🚀 Quick Start
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+### Prerequisites
+- Python 3.11+
+- Node.js 18+
+- Supabase account
+- Git
 
-## Clone and run locally
+### Automated Setup
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
-2. Create a Next.js app using the Supabase Starter template npx command
+### Manual Setup
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+**1. Backend Setup**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
+# Edit .env with your credentials
+uvicorn app.main:app --reload --port 8000
+```
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+**2. Frontend Setup**
+```bash
+cd frontend
+npm install
+cp .env.example .env.local
+# Edit .env.local with your credentials
+npm run dev
+```
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+**3. Access the Application**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/api/v1/docs
 
-3. Use `cd` to change into the app's directory
+## 📁 Project Structure
 
-   ```bash
-   cd with-supabase-app
-   ```
+```
+nutrition-app-monolith/
+├── backend/                 # FastAPI backend
+│   ├── app/
+│   │   ├── api/            # API routes
+│   │   ├── services/       # Business logic (Facade)
+│   │   ├── middleware/     # Auth middleware (Chain of Responsibility)
+│   │   ├── schemas/        # Pydantic models (Builder)
+│   │   ├── config.py       # Settings (Singleton)
+│   │   ├── database.py     # DB manager (Singleton)
+│   │   └── main.py         # Application entry
+│   ├── tests/              # Unit & integration tests
+│   ├── requirements.txt
+│   └── README.md
+├── frontend/               # Next.js frontend
+│   ├── app/               # App Router pages
+│   ├── components/        # React components
+│   ├── lib/               # Utilities & API client (Adapter)
+│   └── package.json
+├── vercel.json            # Vercel deployment config
+└── README.md              # This file
+```
 
-4. Rename `.env.example` to `.env.local` and update the following:
+## 🔑 Environment Variables
 
-  ```env
-  NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[INSERT SUPABASE PROJECT API PUBLISHABLE OR ANON KEY]
-  ```
-  > [!NOTE]
-  > This example uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which refers to Supabase's new **publishable** key format.
-  > Both legacy **anon** keys and new **publishable** keys can be used with this variable name during the transition period. Supabase's dashboard may show `NEXT_PUBLIC_SUPABASE_ANON_KEY`; its value can be used in this example.
-  > See the [full announcement](https://github.com/orgs/supabase/discussions/29260) for more information.
+### Backend (.env)
+```bash
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_KEY=your_supabase_service_role_key
+JWT_SECRET_KEY=your_jwt_secret_min_32_chars
+REDIS_URL=redis://localhost:6379
+RABBITMQ_URL=amqp://guest:guest@localhost:5672/
+GROQ_API_KEY=your_groq_api_key
+```
 
-  Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+### Frontend (.env.local)
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+```
 
-5. You can now run the Next.js local development server:
+## 🔒 Authentication Flow
 
-   ```bash
-   npm run dev
-   ```
+1. User signs up via frontend form
+2. Frontend sends request to `/api/v1/auth/signup`
+3. Backend creates user in Supabase
+4. User receives email confirmation
+5. User logs in via `/api/v1/auth/login`
+6. Backend returns JWT token
+7. Frontend stores token in localStorage
+8. Protected requests include `Authorization: Bearer <token>` header
+9. Backend middleware validates token
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+## 🧪 Testing
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+```bash
+# Backend tests
+cd backend
+pytest
+pytest --cov=app tests/  # With coverage
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+# Frontend tests (when implemented)
+cd frontend
+npm test
+```
 
-## Feedback and issues
+## 🚢 Deployment
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+### Vercel Deployment
 
-## More Supabase examples
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+The backend and frontend are deployed together using `vercel.json` configuration.
+
+## 📚 API Documentation
+
+Once the backend is running, access interactive API documentation:
+- Swagger UI: http://localhost:8000/api/v1/docs
+- ReDoc: http://localhost:8000/api/v1/redoc
+
+### Key Endpoints
+
+- `POST /api/v1/auth/signup` - Register new user
+- `POST /api/v1/auth/login` - User login
+- `GET /api/v1/auth/me` - Get current user
+- `POST /api/v1/auth/logout` - User logout
+- `GET /api/v1/auth/verify` - Verify token
+
+## 🎨 Design Pattern Examples
+
+### Singleton Pattern
+```python
+# config.py - Single instance of settings
+@lru_cache()
+def get_settings() -> Settings:
+    return Settings()
+```
+
+### Facade Pattern
+```python
+# services/auth_service.py - Simplifies Supabase auth
+class AuthenticationService:
+    async def register_user(self, signup_data):
+        # Handles complex Supabase operations
+```
+
+### Chain of Responsibility
+```python
+# middleware/auth.py - Layered validation
+async def get_current_user(...):  # Token validation
+async def get_current_active_user(...):  # Email confirmation
+```
+
+## 🛠️ Technology Stack
+
+### Backend
+- **Framework**: FastAPI 0.115+
+- **Database**: Supabase (PostgreSQL + pgvector)
+- **Cache**: Redis
+- **Queue**: RabbitMQ
+- **AI**: Groq API
+- **Testing**: pytest
+
+### Frontend
+- **Framework**: Next.js 15+ (App Router)
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Auth**: JWT tokens
+- **State**: React hooks
+- **HTTP Client**: Fetch API with TypeScript wrapper
+
+## 📝 Development Guidelines
+
+1. **Backend**: Follow PEP 8, add docstrings, comment design patterns
+2. **Frontend**: Use TypeScript, follow Next.js conventions
+3. **Patterns**: Document which pattern and why in comments
+4. **Testing**: Write tests for new features
+5. **Commits**: Use conventional commits (feat:, fix:, docs:, etc.)
+
+## 🗺️ Roadmap
+
+### Phase 1 - Core Features ✅
+- [x] User authentication (signup/login)
+- [x] JWT token management
+- [x] Backend API structure
+- [ ] Photo upload functionality
+- [ ] AI dish analysis
+- [ ] Recipe generation
+
+### Phase 2 - Enhanced Features
+- [ ] Recipe bookmarking
+- [ ] Meal planning
+- [ ] Nutrition tracking
+- [ ] Social features
+- [ ] Grocery lists
+
+### Phase 3 - Advanced Features
+- [ ] Real-time cooking mode
+- [ ] Ingredient substitutions
+- [ ] Nutrition goals
+- [ ] Multi-language support
+- [ ] Mobile PWA
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🙏 Acknowledgments
+
+- Built with [FastAPI](https://fastapi.tiangolo.com/)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Database by [Supabase](https://supabase.com/)
+- AI powered by [Groq](https://groq.com/)
+
+## 📧 Contact
+
+For questions or issues, please open a GitHub issue.
+
+---
+
+**Note**: This is the monolith implementation. A microservices version with separate services for Auth, Recipes, AI, and Nutrition is planned for Phase 2.
