@@ -3,7 +3,6 @@ FastAPI Main Application
 Monolith architecture for Nutrition App
 """
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from typing import List, Optional
 import base64
@@ -28,15 +27,6 @@ app = FastAPI(
     title="Nutrition App API",
     description="AI-powered nutrition analysis and recipe generation",
     version="1.0.0"
-)
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 # Initialize facade
