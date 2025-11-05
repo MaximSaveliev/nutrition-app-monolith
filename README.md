@@ -1,109 +1,401 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Nutrition App - Monolith Architecture
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+A comprehensive nutrition and recipe application built with FastAPI (Python) backend and Next.js frontend, implementing 10 design patterns in a monolith architecture.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+## 🎯 Features
 
-## Features
+- **AI-Powered Dish Analysis**: Upload a photo of any dish to get detailed nutritional information
+- **Smart Recipe Generation**: Take a photo of ingredients or provide a list to generate step-by-step recipes
+- **Dietary Restrictions**: Support for vegan, vegetarian, gluten-free, keto, and more
+- **Nutrition Tracking**: Track calories, protein, carbohydrates, fat, and other nutrients
+- **Recipe Management**: Save, rate, and manage your favorite recipes
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+## 🏗️ Architecture
 
-## Demo
+This project uses a **Monolith Architecture** where both the backend (FastAPI) and frontend (Next.js) are deployed together on Vercel.
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+### Design Patterns Implemented (10 Total)
 
-## Deploy to Vercel
+#### Creational Patterns (3)
+1. **Factory Pattern** (`patterns/factory.py`)
+   - Creates AI provider instances (Groq)
+   - Allows easy switching between different AI providers
+   - Usage: `AIProviderFactory.create_provider("groq")`
 
-Vercel deployment will guide you through creating a Supabase account and project.
+2. **Singleton Pattern** (`config.py`, `database.py`)
+   - Ensures single instance of configuration and database connections
+   - Maintains connection pools efficiently
+   - Usage: `get_settings()`, `db_connection.get_supabase_client()`
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+3. **Builder Pattern** (`patterns/builder.py`)
+   - Constructs complex Recipe objects step by step
+   - Provides fluent interface for recipe creation
+   - Usage: `RecipeBuilder().set_title("...").add_ingredient("...").build()`
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+#### Structural Patterns (3)
+4. **Adapter Pattern** (`patterns/adapter.py`)
+   - Adapts Groq API responses to application models
+   - Converts raw AI output to structured data
+   - Usage: `GroqAPIAdapter(ai_provider).analyze_dish_nutrition()`
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+5. **Decorator Pattern** (`patterns/decorator.py`)
+   - Adds caching functionality using Redis
+   - Adds logging to functions
+   - Usage: `@cache_result(ttl=3600)`, `@log_execution()`
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+6. **Facade Pattern** (`patterns/facade.py`)
+   - Simplifies complex nutrition analysis operations
+   - Provides unified interface for dish analysis and recipe generation
+   - Usage: `NutritionAnalysisFacade().analyze_dish()`
 
-## Clone and run locally
+#### Behavioral Patterns (3)
+7. **Strategy Pattern** (`patterns/strategy.py`)
+   - Implements different dietary restriction validation strategies
+   - Allows dynamic switching between validation rules
+   - Usage: `DietaryStrategyContext.validate_recipe(recipe, restrictions)`
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+8. **Observer Pattern** (`patterns/observer.py`)
+   - Notifies subscribers about events (recipe creation, dish analysis)
+   - Supports multiple observers (database logging, analytics, webhooks)
+   - Usage: `event_publisher.subscribe(EventType.RECIPE_CREATED, observer)`
 
-2. Create a Next.js app using the Supabase Starter template npx command
+9. **Chain of Responsibility** (`patterns/chain_of_responsibility.py`)
+   - Processes images through validation → resize → optimization pipeline
+   - Each handler can process and pass to next handler
+   - Usage: `image_pipeline.process_image(base64_image)`
 
+10. **Template Method** (Implicit in Strategy Pattern)
+    - Defines skeleton of dietary validation algorithm
+    - Subclasses override specific steps
+
+## 🛠️ Tech Stack
+
+### Backend
+- **FastAPI**: Modern Python web framework
+- **Groq API**: AI-powered image analysis and text generation
+- **Supabase**: PostgreSQL database with real-time capabilities
+- **Redis**: Caching layer
+- **Pillow**: Image processing
+
+### Frontend
+- **Next.js 15**: React framework with App Router
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **Radix UI**: Accessible component primitives
+- **Supabase Client**: Authentication and database
+
+## 📦 Project Structure
+
+```
+nutrition-app-monolith/
+├── backend/
+│   ├── main.py                 # FastAPI application entry point
+│   ├── config.py              # Configuration with Singleton pattern
+│   ├── database.py            # Database connection with Singleton
+│   ├── models.py              # Pydantic models
+│   ├── schema.sql             # Supabase database schema
+│   ├── requirements.txt       # Python dependencies
+│   └── patterns/              # Design pattern implementations
+│       ├── __init__.py
+│       ├── factory.py         # Factory Pattern
+│       ├── builder.py         # Builder Pattern
+│       ├── adapter.py         # Adapter Pattern
+│       ├── decorator.py       # Decorator Pattern
+│       ├── facade.py          # Facade Pattern
+│       ├── strategy.py        # Strategy Pattern
+│       ├── observer.py        # Observer Pattern
+│       └── chain_of_responsibility.py  # Chain Pattern
+├── frontend/
+│   ├── app/                   # Next.js App Router
+│   ├── components/            # React components
+│   ├── lib/                   # Utility functions
+│   └── package.json           # Node dependencies
+└── vercel.json                # Vercel deployment configuration
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.9+
+- Node.js 18+
+- Supabase account
+- Groq API key
+- Redis instance (optional for local development)
+
+### Environment Setup
+
+1. **Clone the repository**
+```bash
+cd nutrition-app-monolith
+```
+
+2. **Backend Setup**
+```bash
+cd backend
+cp .env.example .env
+# Edit .env with your credentials
+pip install -r requirements.txt
+```
+
+3. **Frontend Setup**
+```bash
+cd frontend
+npm install
+```
+
+4. **Database Setup**
+- Go to your Supabase project
+- Navigate to SQL Editor
+- Run the contents of `backend/schema.sql`
+
+### Configuration
+
+Edit `backend/.env`:
+```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+GROQ_API_KEY=your_groq_api_key
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+```
+
+### Local Development
+
+**Backend:**
+```bash
+cd backend
+python main.py
+# API available at http://localhost:8000
+# Docs at http://localhost:8000/docs
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm run dev
+# App available at http://localhost:3000
+```
+
+## 🌐 API Endpoints
+
+### Dish Analysis
+```
+POST /api/analyze-dish
+Body: {
+  "image_data": "base64_encoded_image",
+  "dietary_restrictions": ["vegan", "gluten_free"]
+}
+```
+
+### Recipe Generation
+```
+POST /api/generate-recipe
+Body: {
+  "image_data": "base64_encoded_image",  // or
+  "ingredients": ["chicken", "rice", "broccoli"],
+  "dietary_restrictions": ["keto"],
+  "preferred_cuisine": "Italian",
+  "cooking_time_max": 45
+}
+```
+
+### Recipe Validation
+```
+POST /api/validate-recipe
+Body: {
+  "recipe": { ... },
+  "restrictions": ["vegan"]
+}
+```
+
+### Get Recipes
+```
+GET /api/recipes?limit=10&offset=0&dietary_restrictions=vegan,gluten_free
+```
+
+### Get Recipe by ID
+```
+GET /api/recipes/{recipe_id}
+```
+
+### Dietary Restrictions List
+```
+GET /api/dietary-restrictions
+```
+
+## 🚢 Deployment to Vercel
+
+### Prerequisites
+- Vercel account
+- GitHub repository
+
+### Steps
+
+1. **Connect Repository to Vercel**
+   - Go to [vercel.com](https://vercel.com)
+   - Import your Git repository
+   - Vercel will detect Next.js automatically
+
+2. **Configure Environment Variables**
+   In Vercel Dashboard → Settings → Environment Variables, add:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `GROQ_API_KEY`
+   - `REDIS_HOST`
+   - `REDIS_PORT`
+   - `REDIS_PASSWORD`
+
+3. **Deploy**
    ```bash
-   npx create-next-app --example with-supabase with-supabase-app
+   vercel --prod
    ```
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+### Vercel Configuration
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+The `vercel.json` file configures:
+- Python backend as serverless function
+- Next.js frontend
+- API routing from `/api/*` to backend
+- All other routes to frontend
 
-3. Use `cd` to change into the app's directory
+## 📝 Design Pattern Examples
 
-   ```bash
-   cd with-supabase-app
-   ```
+### Using Factory Pattern
+```python
+# Create AI provider
+ai_provider = AIProviderFactory.create_provider("groq")
+response = ai_provider.analyze_image(image_data, prompt)
+```
 
-4. Rename `.env.example` to `.env.local` and update the following:
+### Using Builder Pattern
+```python
+# Build complex recipe
+recipe = (RecipeBuilder()
+    .set_title("Vegan Buddha Bowl")
+    .add_ingredient("quinoa")
+    .add_ingredient("chickpeas")
+    .set_nutrition_info(calories=450, protein=15, carbs=60, fat=12)
+    .add_dietary_restriction(DietaryRestriction.VEGAN)
+    .build())
+```
 
-  ```env
-  NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[INSERT SUPABASE PROJECT API PUBLISHABLE OR ANON KEY]
-  ```
-  > [!NOTE]
-  > This example uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which refers to Supabase's new **publishable** key format.
-  > Both legacy **anon** keys and new **publishable** keys can be used with this variable name during the transition period. Supabase's dashboard may show `NEXT_PUBLIC_SUPABASE_ANON_KEY`; its value can be used in this example.
-  > See the [full announcement](https://github.com/orgs/supabase/discussions/29260) for more information.
+### Using Decorator Pattern
+```python
+@cache_result(ttl=3600, prefix="nutrition")
+@log_execution(log_args=True)
+def expensive_analysis(data):
+    # This result will be cached for 1 hour
+    return analyze(data)
+```
 
-  Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+### Using Strategy Pattern
+```python
+# Validate against dietary restrictions
+result = DietaryStrategyContext.validate_recipe(
+    recipe, 
+    [DietaryRestriction.VEGAN, DietaryRestriction.GLUTEN_FREE]
+)
+```
 
-5. You can now run the Next.js local development server:
+### Using Observer Pattern
+```python
+# Subscribe to events
+event_publisher.subscribe(
+    EventType.RECIPE_CREATED, 
+    EmailNotificationObserver()
+)
 
-   ```bash
-   npm run dev
-   ```
+# Publish events
+event_publisher.notify(
+    EventType.RECIPE_CREATED,
+    {"recipe_id": "123", "title": "New Recipe"}
+)
+```
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+### Using Chain of Responsibility
+```python
+# Process image through pipeline
+processed = image_pipeline.process_image(base64_image)
+# Automatically: validates → resizes → optimizes
+```
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+## 🧪 Testing
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+```bash
+# Backend tests
+cd backend
+pytest
 
-## Feedback and issues
+# Frontend tests
+cd frontend
+npm test
+```
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+## 📊 Database Schema
 
-## More Supabase examples
+Key tables:
+- `recipes`: Store generated and user recipes
+- `dish_analyses`: Store dish analysis results
+- `event_logs`: Store system events (Observer pattern)
+- `user_preferences`: Store user dietary preferences
+- `saved_recipes`: Store user's favorite recipes
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+## 🔒 Security
+
+- Row Level Security (RLS) enabled on all tables
+- Authentication via Supabase Auth
+- API keys stored as environment variables
+- Input validation on all endpoints
+
+## 🎓 Educational Purpose
+
+This project demonstrates:
+- ✅ Clean architecture principles
+- ✅ 10 design patterns in real-world scenarios
+- ✅ Monolith architecture
+- ✅ Modern Python and TypeScript practices
+- ✅ Cloud deployment (Vercel)
+- ✅ Database design with Supabase
+- ✅ AI integration (Groq)
+- ✅ Real-time features
+- ✅ Image processing pipeline
+- ✅ Caching strategies
+
+## 📚 Next Steps for Microservices Version
+
+To convert to microservices:
+1. Separate concerns into services:
+   - Auth Service
+   - Recipe Service
+   - Nutrition Analysis Service
+   - Image Processing Service
+   - Notification Service
+2. Add message queue (RabbitMQ)
+3. Implement API Gateway
+4. Add service discovery
+5. Use Docker containers
+6. Orchestrate with Kubernetes
+
+## 🤝 Contributing
+
+This is an educational project. Feel free to:
+- Report issues
+- Suggest improvements
+- Add more design patterns
+- Enhance features
+
+## 📄 License
+
+MIT License - feel free to use for learning and education
+
+## 👤 Author
+
+Created for ASS-PSS Project demonstrating monolith architecture with design patterns.
+
+---
+
+**Note**: This is the monolith version. The microservices version will be in a separate repository with distributed architecture.
