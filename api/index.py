@@ -1,14 +1,14 @@
 # Main API entry point for Vercel Python runtime
-# This file is detected by Vercel and serves as the ASGI application
-
 import sys
-from pathlib import Path
+import os
 
-# Add backend directory to Python path
-backend_dir = Path(__file__).resolve().parent.parent / "backend"
-sys.path.insert(0, str(backend_dir))
+# Get the absolute path to the project root
+current_dir = os.path.dirname(os.path.abspath(__file__))
+backend_dir = os.path.join(current_dir, '..', 'backend')
+sys.path.insert(0, backend_dir)
 
+# Now import the FastAPI app
 from app.main import app
 
-# Export the FastAPI app - Vercel will use this
-handler = app
+# Export for Vercel
+app = app
