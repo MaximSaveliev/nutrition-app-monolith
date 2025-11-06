@@ -1,7 +1,6 @@
-"""
-Vercel Serverless Function Entry Point
-This file must be at api/route.py for Vercel's Python runtime
-"""
+# Main API entry point for Vercel Python runtime
+# This file is detected by Vercel and serves as the ASGI application
+
 import sys
 from pathlib import Path
 
@@ -11,5 +10,5 @@ sys.path.insert(0, str(backend_dir))
 
 from app.main import app
 
-# Export for Vercel
+# Export the FastAPI app - Vercel will use this
 handler = app
