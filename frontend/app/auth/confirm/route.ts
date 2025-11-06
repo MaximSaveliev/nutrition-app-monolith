@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { type NextRequest } from "next/server";
@@ -9,19 +8,29 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") as EmailOtpType | null;
 
   if (token_hash && type) {
-    const supabase = await createClient();
+    try {
+      // Call backend to verify email
+      const apiUrl = process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}/api/auth/verify-email`
+        : "http://localhost:8000/api/auth/verify-email";
+      
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token_hash, type }),
+      });
 
-    const { error } = await supabase.auth.verifyOtp({
-      type,
-      token_hash,
-    });
-    
-    if (!error) {
-      // Email confirmed successfully - redirect to confirmed page
-      redirect("/auth/confirmed");
-    } else {
-      // Redirect to error page with error message
-      redirect(`/auth/error?error=${error.message}`);
+      if (response.ok) {
+        // Email verified successfully - redirect to confirmed page
+        redirect("/auth/confirmed");
+      } else {
+        const error = await response.json();
+        redirect(`/auth/error?error=${error.detail || "Verification failed"}`);
+      }
+    } catch (error) {
+      redirect("/auth/error?error=Verification request failed");
     }
   }
 

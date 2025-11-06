@@ -143,7 +143,7 @@ async def verify_token(
 
 @router.post(
     "/verify-email",
-    response_model=TokenResponse,
+    response_model=AuthResponse,
     summary="Verify email",
     description="Verify email confirmation token from Supabase email link",
 )
@@ -162,11 +162,10 @@ async def verify_email(
         verification_data.type
     )
 
-    return TokenResponse(
-        access_token=result["access_token"],
-        token_type=result["token_type"],
-        expires_in=result["expires_in"],
-        user=UserResponse(**result["user"]),
+    return AuthResponse(
+        message=result["message"],
+        success=True,
+        data={"user": result["user"]},
     )
 
 
