@@ -5,6 +5,7 @@ Pattern: Singleton Pattern - Single configuration instance across the app
 from functools import lru_cache
 from typing import Optional
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,11 +19,11 @@ class Settings(BaseSettings):
 
     # Supabase Configuration
     supabase_url: str
-    supabase_key: str
-    supabase_service_key: str
+    supabase_key: str = Field(validation_alias="supabase_anon_key")
+    supabase_service_key: str = Field(validation_alias="supabase_service_role_key")
 
     # JWT Configuration
-    jwt_secret_key: str
+    jwt_secret_key: str = Field(validation_alias="supabase_jwt_secret")
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
@@ -37,7 +38,7 @@ class Settings(BaseSettings):
     groq_api_key: Optional[str] = None
 
     model_config = SettingsConfigDict(
-        env_file=".env.local",  # Simplified path for local development
+        env_file=".env.local",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
