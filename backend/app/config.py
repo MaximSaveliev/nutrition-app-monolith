@@ -42,10 +42,13 @@ class Settings(BaseSettings):
         # Look for .env files in parent directory (repo root).
         # The repository root contains `.env.local` (created by the user / Vercel).
         # This makes local dev and CI more predictable.
+        # On Vercel, environment variables are set directly, so env_file is optional
         env_file="../.env.local",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
+        # Allow environment variables from Vercel
+        env_ignore_empty=True,
     )
 
 
