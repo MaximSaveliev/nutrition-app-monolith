@@ -36,17 +36,11 @@ class AuthenticationService:
                     detail="Email already registered",
                 )
             
-            # Get base URL and set redirect to confirmation route
-            base_url = self.settings.get_base_url()
-            redirect_url = f"{base_url}/auth/confirm"
-            
             # Create user with email verification
+            # Email template should use: {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup
             response = self.db.client.auth.sign_up({
                 "email": signup_data.email,
                 "password": signup_data.password,
-                "options": {
-                    "email_redirect_to": redirect_url
-                }
             })
 
             if not response.user:
