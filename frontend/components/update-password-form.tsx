@@ -16,7 +16,7 @@ export function UpdatePasswordForm() {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get token from URL hash (Supabase sends it this way)
+    // Supabase sends token in URL hash after redirect
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.substring(1));
     const accessToken = params.get("access_token");
