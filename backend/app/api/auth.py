@@ -10,6 +10,8 @@ from app.middleware.auth import get_current_user
 from app.schemas.auth import (
     AuthResponse,
     EmailVerificationRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
     TokenResponse,
     UserLoginRequest,
     UserResponse,
@@ -166,3 +168,60 @@ async def verify_email(
         expires_in=result["expires_in"],
         user=UserResponse(**result["user"]),
     )
+
+
+@router.post(
+    "/forgot-password",
+    response_model=AuthResponse,
+    summary="Request password reset",
+    description="Send password reset email to user",
+)
+async def forgot_password(
+    request_data: ForgotPasswordRequest,
+    db: DatabaseManager = Depends(get_database),
+):
+    """
+    Request password reset email
+    
+    - **email**: User's email address
+    
+    Sends an email with a password reset link
+    """
+    auth_service = get_auth_service(db)
+    result = await auth_service.request_password_reset(request_data.email)
+
+    return AuthResponse(
+        message=result["message"],
+        success=True,
+    )
+
+
+@router.post(
+    "/reset-password",
+    response_model=AuthResponse,
+    summary="Reset password",
+    description="Reset user password with token from email",
+)
+async def reset_password(
+    reset_data: ResetPasswordRequest,
+    db: DatabaseManager = Depends(get_database),
+):
+    """
+    Reset password using token from email
+    
+    - **token**: Password reset token from email link
+    - **password**: New password
+    - **repeat_password**: Password confirmation
+    """
+    auth_service = get_auth_service(db)
+    result = await auth_service.reset_password(
+        reset_data.token,
+        reset_data.password
+    )
+
+    return AuthResponse(
+        message=result["message"],
+        success=True,
+        data={"user": result["user"]},
+    )
+

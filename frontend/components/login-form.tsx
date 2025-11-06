@@ -5,11 +5,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export function LoginForm() {
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("password_reset") === "success") {
+      setSuccess("Password updated successfully! You can now login with your new password.");
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,7 +55,13 @@ export function LoginForm() {
           <div>
             <Label htmlFor="password">Password</Label>
             <Input id="password" name="password" type="password" required disabled={loading} />
+            <div className="text-right mt-1">
+              <Link href="/auth/forgot-password" className="text-xs text-muted-foreground hover:underline">
+                Forgot password?
+              </Link>
+            </div>
           </div>
+          {success && <div className="text-sm text-green-600 bg-green-50 dark:bg-green-950 p-2 rounded">{success}</div>}
           {error && <div className="text-sm text-red-600">{error}</div>}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Logging in..." : "Login"}

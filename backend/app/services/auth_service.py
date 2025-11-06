@@ -144,6 +144,61 @@ class AuthenticationService:
         except Exception:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Logout failed")
 
+    async def request_password_reset(self, email: str) -> Dict[str, str]:
+        """Send password reset email"""
+        try:
+            response = self.db.client.auth.reset_password_email(
+                email,
+                {"redirect_to": f"{self.settings.frontend_url}/auth/update-password"}
+            )
+            return {"message": "Password reset email sent. Please check your inbox."}
+        except Exception as e:
+            # Don't reveal if email exists or not for security
+            return {"message": "If an account exists with this email, you will receive a password reset link."}
+
+    async def reset_password(self, access_token: str, new_password: str) -> Dict[str, any]:
+        """Reset password using access token from email"""
+        try:
+            # Create a new client instance with the access token
+            from supabase import create_client
+            
+            # Use the access token to authenticate
+            temp_client = create_client(
+                self.settings.supabase_url,
+                self.settings.supabase_key
+            )
+            
+            # Set the auth token
+            temp_client.auth.set_session(access_token, access_token)
+            
+            # Update the password
+            update_response = temp_client.auth.update_user({
+                "password": new_password
+            })
+            
+            if not update_response.user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Failed to update password"
+                )
+
+            return {
+                "message": "Password updated successfully",
+                "user": {
+                    "id": update_response.user.id,
+                    "email": update_response.user.email,
+                    "email_confirmed_at": update_response.user.email_confirmed_at,
+                    "created_at": update_response.user.created_at,
+                },
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Password reset failed: {str(e)}"
+            )
+
 
 def get_auth_service(db: DatabaseManager) -> AuthenticationService:
     """

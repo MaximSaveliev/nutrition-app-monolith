@@ -53,6 +53,40 @@ class EmailVerificationRequest(BaseModel):
     type: str = Field(..., description="Verification type (e.g., 'email')")
 
 
+class ForgotPasswordRequest(BaseModel):
+    """Request model for password reset request"""
+
+    email: EmailStr = Field(..., description="User's email address")
+
+
+class ResetPasswordRequest(BaseModel):
+    """Request model for password reset with token"""
+
+    token: str = Field(..., description="Password reset token from email")
+    password: str = Field(..., min_length=8, description="New password")
+    repeat_password: str = Field(..., description="Password confirmation")
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """Validate password meets security requirements"""
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if not any(char.isdigit() for char in v):
+            raise ValueError("Password must contain at least one digit")
+        if not any(char.isupper() for char in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        return v
+
+    @field_validator("repeat_password")
+    @classmethod
+    def passwords_match(cls, v: str, info) -> str:
+        """Validate password confirmation matches"""
+        if "password" in info.data and v != info.data["password"]:
+            raise ValueError("Passwords do not match")
+        return v
+
+
 class TokenResponse(BaseModel):
     """Response model for authentication tokens"""
 

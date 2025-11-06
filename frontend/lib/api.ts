@@ -50,3 +50,27 @@ export async function logout(token: string) {
   if (!response.ok) throw new Error(data.detail || "Logout failed");
   return data;
 }
+
+export async function forgotPassword(email: string) {
+  const response = await fetch(`${API_URL}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Request failed");
+  return data;
+}
+
+export async function resetPassword(token: string, password: string, repeat_password: string) {
+  const response = await fetch(`${API_URL}/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, password, repeat_password }),
+  });
+  
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Password reset failed");
+  return data;
+}
