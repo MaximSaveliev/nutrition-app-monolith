@@ -1,0 +1,61 @@
+{{{
+
+  "version": 2,
+
+  "builds": [  "buildCommand": "cd frontend && npm install && npm run build",  "version": 2,
+
+    {
+
+      "src": "index.py",  "outputDirectory": "frontend/.next",  "builds": [
+
+      "use": "@vercel/python"
+
+    },  "installCommand": "cd frontend && npm install && cd ../backend && pip install -r requirements.txt",    {
+
+    {
+
+      "src": "frontend/package.json",  "devCommand": "cd frontend && npm run dev",      "src": "api/index.py",
+
+      "use": "@vercel/next"
+
+    }  "framework": null,      "use": "@vercel/python",
+
+  ],
+
+  "routes": [  "functions": {      "config": {
+
+    {
+
+      "src": "/(api|docs|openapi.json|redoc)(.*)",    "index.py": {        "maxLambdaSize": "50mb"
+
+      "dest": "/index.py"
+
+    },      "runtime": "python3.9"      }
+
+    {
+
+      "src": "/(.*)",    }    },
+
+      "dest": "/frontend/$1"
+
+    }  }    {
+
+  ]
+
+}}      "src": "frontend/package.json",
+
+
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/$1"
+    }
+  ]
+}
