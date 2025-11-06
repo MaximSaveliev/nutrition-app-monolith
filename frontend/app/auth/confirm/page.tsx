@@ -12,7 +12,7 @@ export default function ConfirmPage() {
       // Supabase redirects here with access_token in URL hash after email confirmation
       const hash = window.location.hash;
       const params = new URLSearchParams(hash.substring(1));
-      const accessToken = params.get("access_token");
+      const accessToken = params.get("token");
       const type = params.get("type");
       const errorParam = params.get("error");
       const errorDescription = params.get("error_description");
