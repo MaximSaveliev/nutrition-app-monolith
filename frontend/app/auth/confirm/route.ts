@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { type NextRequest } from "next/server";
@@ -8,34 +9,22 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") as EmailOtpType | null;
 
   if (token_hash && type) {
-    try {
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000";
-      
-      const apiUrl = `${baseUrl}/api/auth/verify-email`;
-      
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token_hash,
-          type,
-        }),
-      });
+    const supabase = await createClient();
 
-      if (response.ok) {
-        redirect("/auth/login?confirmed=true");
-      } else {
-        const error = await response.json();
-        redirect(`/auth/error?error=${error.detail || "Verification failed"}`);
-      }
-    } catch (error) {
-      redirect(`/auth/error?error=Verification request failed`);
+    const { error } = await supabase.auth.verifyOtp({
+      type,
+      token_hash,
+    });
+    
+    if (!error) {
+      // Email confirmed successfully - redirect to login
+      redirect("/auth/login?confirmed=true");
+    } else {
+      // Redirect to error page with error message
+      redirect(`/auth/error?error=${error?.message}`);
     }
   }
 
+  // No token hash or type - redirect to error
   redirect(`/auth/error?error=No token hash or type`);
 }
