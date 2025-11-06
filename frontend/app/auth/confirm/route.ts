@@ -10,8 +10,15 @@ export async function GET(request: NextRequest) {
 
   if (token_hash && type) {
     try {
+      // Determine the API URL based on environment
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000";
+      
+      const apiUrl = `${baseUrl}/api/auth/verify-email`;
+      
       // Call FastAPI backend to verify the email confirmation
-      const response = await fetch(`http://localhost:8000/api/auth/verify-email`, {
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
