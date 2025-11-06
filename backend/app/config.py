@@ -2,6 +2,7 @@
 Configuration Settings
 Pattern: Singleton Pattern - Single configuration instance across the app
 """
+import os
 from functools import lru_cache
 from typing import Optional
 
@@ -30,7 +31,8 @@ class Settings(BaseSettings):
     # Application Configuration
     app_env: str = "development"
     api_prefix: str = "/api"
-    frontend_url: str = "http://localhost:3000"
+    frontend_url: Optional[str] = None
+    vercel_url: Optional[str] = None  # Automatically set by Vercel
 
     # Optional Services (not required for basic auth)
     redis_url: str = "redis://localhost:6379"
@@ -43,6 +45,26 @@ class Settings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
+    
+    def get_base_url(self) -> str:
+        """
+        Get the base URL for the application.
+        Automatically detects Vercel deployment URL or uses configured frontend_url.
+        
+        Priority:
+        1. FRONTEND_URL (if explicitly set)
+        2. VERCEL_URL (automatically set by Vercel for each deployment)
+        3. Fallback to localhost:3000
+        """
+        if self.frontend_url:
+            return self.frontend_url
+        
+        if self.vercel_url:
+            # Vercel provides the URL without protocol, add https://
+            return f"https://{self.vercel_url}"
+        
+        # Fallback for local development
+        return "http://localhost:3000"
 
 
 @lru_cache()

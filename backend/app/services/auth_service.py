@@ -36,11 +36,16 @@ class AuthenticationService:
                     detail="Email already registered",
                 )
             
+            # Get base URL (automatically detects Vercel deployment URL)
+            base_url = self.settings.get_base_url()
+            
             # Create user with email verification
             response = self.db.client.auth.sign_up({
                 "email": signup_data.email,
                 "password": signup_data.password,
-                "options": {"email_redirect_to": f"{self.settings.frontend_url}/auth/confirm"},
+                "options": {
+                    "email_redirect_to": f"{base_url}/auth/confirm"
+                },
             })
 
             if not response.user:
@@ -147,14 +152,28 @@ class AuthenticationService:
     async def request_password_reset(self, email: str) -> Dict[str, str]:
         """Send password reset email"""
         try:
+            # Get base URL (automatically detects Vercel deployment URL)
+            base_url = self.settings.get_base_url()
+            redirect_url = f"{base_url}/auth/update-password"
+            
             response = self.db.client.auth.reset_password_email(
                 email,
-                {"redirect_to": f"{self.settings.frontend_url}/auth/update-password"}
+                options={"redirect_to": redirect_url}
             )
-            return {"message": "Password reset email sent. Please check your inbox."}
+            
+            return {
+                "message": "Password reset email sent. Please check your inbox.",
+                "redirect_url": redirect_url  # Return the URL so frontend knows where to direct users
+            }
         except Exception as e:
             # Don't reveal if email exists or not for security
-            return {"message": "If an account exists with this email, you will receive a password reset link."}
+            # But log the error for debugging
+            print(f"Password reset error: {str(e)}")
+            base_url = self.settings.get_base_url()
+            return {
+                "message": "If an account exists with this email, you will receive a password reset link.",
+                "redirect_url": f"{base_url}/auth/update-password"
+            }
 
     async def reset_password(self, access_token: str, new_password: str) -> Dict[str, any]:
         """Reset password using access token from email"""
