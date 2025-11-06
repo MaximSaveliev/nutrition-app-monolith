@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
     });
     
     if (!error) {
-      // Email confirmed successfully - redirect to login page
-      redirect("/auth/login?confirmed=true");
+      // Email confirmed successfully - redirect to confirmed page
+      redirect("/auth/confirmed");
     } else {
       // Redirect to error page with error message
       redirect(`/auth/error?error=${error.message}`);
