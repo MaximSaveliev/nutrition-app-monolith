@@ -7,6 +7,7 @@ Why: Settings should be loaded once and shared across all modules to prevent
 
 from functools import lru_cache
 from typing import Optional
+import os
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -39,11 +40,9 @@ class Settings(BaseSettings):
     groq_api_key: Optional[str] = None
 
     model_config = SettingsConfigDict(
-        # Look for .env files in parent directory (repo root).
-        # The repository root contains `.env.local` (created by the user / Vercel).
-        # This makes local dev and CI more predictable.
-        # On Vercel, environment variables are set directly, so env_file is optional
-        env_file="../.env.local",
+        # Look for .env files in parent directory (repo root) only in development
+        # On Vercel, environment variables are set directly
+        env_file="../.env.local" if os.getenv("VERCEL") != "1" else None,
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
