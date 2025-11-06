@@ -9,10 +9,9 @@ export async function GET(request: NextRequest) {
 
   if (token_hash && type) {
     try {
-      // Call backend to verify email
-      const apiUrl = process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}/api/auth/verify-email`
-        : "http://localhost:8000/api/auth/verify-email";
+      // Get the API URL from the request origin
+      const origin = new URL(request.url).origin;
+      const apiUrl = `${origin}/api/auth/verify-email`;
       
       const response = await fetch(apiUrl, {
         method: "POST",
