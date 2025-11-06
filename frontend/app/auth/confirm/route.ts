@@ -17,14 +17,14 @@ export async function GET(request: NextRequest) {
     });
     
     if (!error) {
-      // Email confirmed successfully - redirect to login
+      // Email confirmed successfully - redirect to login page
       redirect("/auth/login?confirmed=true");
     } else {
       // Redirect to error page with error message
-      redirect(`/auth/error?error=${error?.message}`);
+      redirect(`/auth/error?error=${error.message}`);
     }
   }
 
   // No token hash or type - redirect to error
-  redirect(`/auth/error?error=No token hash or type`);
+  redirect("/auth/error?error=Missing token or type");
 }
