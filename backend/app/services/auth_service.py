@@ -36,11 +36,17 @@ class AuthenticationService:
                     detail="Email already registered",
                 )
             
+            # Get base URL and set redirect to confirmation route
+            base_url = self.settings.get_base_url()
+            redirect_url = f"{base_url}/auth/confirm"
+            
             # Create user with email verification
-            # Don't set email_redirect_to - let Supabase use the confirmation URL from email template
             response = self.db.client.auth.sign_up({
                 "email": signup_data.email,
                 "password": signup_data.password,
+                "options": {
+                    "email_redirect_to": redirect_url
+                }
             })
 
             if not response.user:
