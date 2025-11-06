@@ -1,19 +1,20 @@
 """
 Configuration Settings
-Pattern: Singleton Pattern - Ensures single instance of configuration across the app
-Why: Settings should be loaded once and shared across all modules to prevent
-      multiple environment reads and ensure consistency
+Pattern: Singleton Pattern - Single configuration instance across the app
 """
-
 from functools import lru_cache
 from typing import Optional
-import os
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables"""
+    """
+    Application settings loaded from environment variables.
+    
+    In development: Loads from .env.local file
+    In production (Vercel): Loads from environment variables set in Vercel Dashboard
+    """
 
     # Supabase Configuration
     supabase_url: str
@@ -30,24 +31,16 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
     frontend_url: str = "http://localhost:3000"
 
-    # Redis Configuration
+    # Optional Services (not required for basic auth)
     redis_url: str = "redis://localhost:6379"
-
-    # RabbitMQ Configuration
     rabbitmq_url: str = "amqp://guest:guest@localhost:5672/"
-
-    # Groq API
     groq_api_key: Optional[str] = None
 
     model_config = SettingsConfigDict(
-        # Look for .env files in parent directory (repo root) only in development
-        # On Vercel, environment variables are set directly
-        env_file="../.env.local" if os.getenv("VERCEL") != "1" else None,
+        env_file=".env.local",  # Simplified path for local development
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
-        # Allow environment variables from Vercel
-        env_ignore_empty=True,
     )
 
 

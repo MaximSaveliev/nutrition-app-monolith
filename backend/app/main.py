@@ -41,13 +41,14 @@ def create_application() -> FastAPI:
     )
 
     # Configure CORS
-    # Allow localhost for development and Vercel domains for production
+    # Pattern: Middleware configuration for cross-origin requests
+    # Allows: localhost (dev) and all Vercel preview/production domains
     app.add_middleware(
         CORSMiddleware,
         allow_origin_regex=r"https://.*\.vercel\.app|http://localhost:\d+",
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_credentials=True,  # Required for cookie-based auth
+        allow_methods=["*"],  # Allow all HTTP methods
+        allow_headers=["*"],  # Allow all headers including Authorization
     )
 
     # Include routers

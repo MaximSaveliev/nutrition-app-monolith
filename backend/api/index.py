@@ -1,11 +1,10 @@
-import sys
-from pathlib import Path
-
-# Add backend directory to Python path
-backend_dir = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(backend_dir))
-
+"""
+Vercel Serverless Function Entry Point
+Exports the FastAPI app for Vercel's Python runtime
+"""
 from app.main import app
 
-# Export for Vercel
+# Vercel requires a 'handler' or 'app' export
 handler = app
+
+
