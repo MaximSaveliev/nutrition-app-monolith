@@ -18,6 +18,9 @@ export function LoginForm() {
     if (searchParams.get("password_reset") === "success") {
       setSuccess("Password updated successfully! You can now login with your new password.");
     }
+    if (searchParams.get("confirmed") === "true") {
+      setSuccess("Email confirmed successfully! You can now login to your account.");
+    }
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
