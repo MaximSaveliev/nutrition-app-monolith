@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -5,7 +6,7 @@ import { type NextRequest, NextResponse } from "next/server";
  * Email Confirmation Route Handler
  * 
  * Handles email verification after user clicks confirmation link from email.
- * Flow: Email link → This route → Backend verification → Redirect to login
+ * Flow: Email link → This route → Backend verification → Clear session → Redirect to login
  * 
  * Email template should use: {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup
  */
@@ -31,6 +32,10 @@ export async function GET(request: NextRequest) {
     });
 
     if (response.ok) {
+      // Clear any session cookies created by Supabase
+      const supabase = await createClient();
+      await supabase.auth.signOut();
+      
       // Success - redirect to login with confirmation message
       return NextResponse.redirect(
         new URL("/auth/login?confirmed=true", request.url)
