@@ -115,10 +115,15 @@ class AuthenticationService:
     async def verify_email_token(self, token_hash: str, type: str) -> Dict[str, any]:
         """Verify email confirmation token"""
         try:
+            # Verify the OTP token with Supabase
             response = self.db.client.auth.verify_otp({"token_hash": token_hash, "type": type})
             
             if not response.user or not response.session:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
+
+            # Sign out immediately after verification
+            # User should login manually after email confirmation
+            self.db.client.auth.sign_out()
 
             return {
                 "message": "Email verified successfully",
