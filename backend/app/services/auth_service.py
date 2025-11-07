@@ -43,7 +43,7 @@ class AuthenticationService:
                 "email": signup_data.email,
                 "password": signup_data.password,
                 "options": {
-                    "email_redirect_to": f"{base_url}/auth/confirm"
+                    "email_redirect_to": f"{base_url}/auth/login?confirmed=true"
                 }
             })
 
