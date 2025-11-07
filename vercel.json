@@ -19,5 +19,10 @@
       "src": "/(.*)",
       "dest": "/frontend/$1"
     }
-  ]
+  ],
+  "functions": {
+    "backend/app/main.py": {
+      "includeFiles": "backend/app/"
+    }
+  }
 }
