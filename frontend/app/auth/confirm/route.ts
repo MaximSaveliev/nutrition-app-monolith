@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
   // If no token or verification failed, just redirect to login anyway
   // (Supabase already verified it before redirecting here)
-  return NextResponse.redirect(
-    new URL("/auth/login?confirmed=true", request.url)
-  );
+  // return NextResponse.redirect(
+  //   new URL("/auth/login?confirmed=true", request.url)
+  // );
 }
