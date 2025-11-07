@@ -21,10 +21,10 @@ export function LoginForm() {
     if (searchParams.get("confirmed") === "true") {
       setSuccess("Email confirmed successfully! You can now login to your account.");
     }
-    const message = searchParams.get("message");
-    if (message) {
-      setSuccess(message);
-    }
+    // const message = searchParams.get("message");
+    // if (message) {
+    //   setSuccess(message);
+    // }
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
