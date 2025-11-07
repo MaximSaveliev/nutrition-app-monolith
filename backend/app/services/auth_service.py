@@ -37,10 +37,14 @@ class AuthenticationService:
                 )
             
             # Create user with email verification
-            # Email template should use: {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup
+            # Set redirect URL to /auth/confirm
+            base_url = self.settings.get_base_url()
             response = self.db.client.auth.sign_up({
                 "email": signup_data.email,
                 "password": signup_data.password,
+                "options": {
+                    "email_redirect_to": f"{base_url}/auth/confirm"
+                }
             })
 
             if not response.user:
