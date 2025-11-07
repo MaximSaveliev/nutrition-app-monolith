@@ -1,21 +1,61 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Nutrition App - Frontend
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+AI-Powered Recipe & Nutrition Analysis Application built with Next.js 15, Tailwind CSS, and shadcn/ui.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+## Features
+
+- 📸 **Photo Food Analysis**: Upload food images for instant nutrition analysis
+- 🥗 **Recipe Generation**: Generate recipes from ingredient photos
+- 🔍 **Smart Search**: Vector-based recipe search with dietary filters
+- 👤 **User Authentication**: Secure auth with FastAPI backend
+- 🎨 **Modern UI**: Built with shadcn/ui and Tailwind CSS
+- 🌓 **Dark Mode**: System-aware theme switching
+
+## Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Styling**: Tailwind CSS
+- **Components**: shadcn/ui
+- **Auth**: FastAPI backend + Supabase
+- **API**: REST API communication with backend
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+Runs on [http://localhost:3000](http://localhost:3000)
+
+## Environment Variables
+
+Create `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_key
+```
+
+## Project Structure
+
+```
+frontend/
+├── app/              # Next.js App Router pages
+├── components/       # React components
+│   ├── ui/          # shadcn/ui components
+│   └── *.tsx        # Custom components
+├── lib/             # Utilities and API client
+└── proxy.ts         # Middleware proxy
+```
+
+## Build
+
+```bash
+npm run build
+npm start
+```
+
 
 ## Features
 

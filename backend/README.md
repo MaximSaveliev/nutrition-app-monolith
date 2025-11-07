@@ -38,8 +38,6 @@ backend/
 │   └── schemas/
 │       ├── __init__.py
 │       └── auth.py          # Pydantic models (Builder)
-├── api/
-│   └── index.py             # Vercel entry point
 ├── requirements.txt
 ├── .env.example
 └── README.md
