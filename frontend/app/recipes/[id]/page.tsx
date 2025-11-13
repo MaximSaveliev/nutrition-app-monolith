@@ -50,21 +50,33 @@ interface Recipe {
 
 async function getRecipe(id: string): Promise<Recipe | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
-    const response = await fetch(`${baseUrl}/api/recipes/${id}`, {
+    // In production (Vercel), use the same domain; in development, use localhost:8000
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const baseUrl = isDevelopment 
+      ? 'http://localhost:8000' 
+      : `https://${process.env.VERCEL_URL || 'nutrition-app-monolith.vercel.app'}`;
+    
+    const url = `${baseUrl}/api/recipes/${id}`;
+    console.log('[SSR] Fetching recipe from:', url);
+    
+    const response = await fetch(url, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
+    console.log('[SSR] Response status:', response.status);
+
     if (!response.ok) {
       return null;
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('[SSR] Recipe data:', data.title);
+    return data;
   } catch (error) {
-    console.error('Error fetching recipe:', error);
+    console.error('[SSR] Error fetching recipe:', error);
     return null;
   }
 }
