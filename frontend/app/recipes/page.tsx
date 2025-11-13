@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { Clock, Users, Flame, Plus, Beef, Apple, Droplet, Wheat, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
+import { API_URL } from "@/lib/config";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 const RECIPES_PER_BATCH = 6;
 
 interface Recipe {
@@ -56,7 +56,7 @@ export default function RecipesPage() {
     setCurrentBatch(1); // Reset batch when switching tabs
 
     // Fetch recipes
-    const url = `${BACKEND_URL}/api/recipes?my_recipes=${showMyRecipes}`;
+    const url = `${API_URL}/recipes?my_recipes=${showMyRecipes}`;
     fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,

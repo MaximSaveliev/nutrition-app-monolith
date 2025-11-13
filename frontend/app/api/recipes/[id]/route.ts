@@ -10,27 +10,16 @@ export async function GET(
   const authHeader = request.headers.get("authorization");
   
   try {
-    const url = `${BACKEND_URL}/api/recipes/${id}`;
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (authHeader) headers["Authorization"] = authHeader;
     
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
-    
-    if (authHeader) {
-      headers["Authorization"] = authHeader;
-    }
-    
-    const response = await fetch(url, { headers });
-
-    if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(error, { status: response.status });
-    }
-
+    const response = await fetch(`${BACKEND_URL}/api/recipes/${id}`, { headers });
     const data = await response.json();
+    
+    if (!response.ok) return NextResponse.json(data, { status: response.status });
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching recipe:", error);
     return NextResponse.json({ error: "Failed to fetch recipe" }, { status: 500 });
   }
 }
+
