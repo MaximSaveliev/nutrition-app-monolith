@@ -8,6 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Users, Apple, Flame, Beef, Droplet, ArrowLeft, Wheat } from "lucide-react";
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 interface Ingredient {
   name: string;
   quantity: string;
