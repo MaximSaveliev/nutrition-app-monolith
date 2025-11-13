@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Users, Flame, Beef, Apple, Droplet, Wheat, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { API_URL } from "@/lib/config";
 
 interface Recipe {
   id: string;
@@ -58,7 +59,7 @@ export function PublicRecipes() {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const response = await fetch("http://localhost:8000/api/recipes?my_recipes=false", {
+      const response = await fetch(`${API_URL}/recipes?my_recipes=false`, {
         headers,
       });
 

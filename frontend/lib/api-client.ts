@@ -4,7 +4,7 @@
  * Provides consistent error handling and request/response transformation
  */
 
-const API_URL = "http://localhost:8000/api";
+import { API_URL, BACKEND_URL } from './config';
 
 interface LoginResponse {
   access_token: string;
@@ -108,7 +108,7 @@ export async function analyzeAndLogDish(file: File, mealType: string, token?: st
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`http://localhost:8000/api/nutrition/analyze-and-log-dish`, {
+  const response = await fetch(`${API_URL}/nutrition/analyze-and-log-dish`, {
     method: "POST",
     headers,
     body: formData,

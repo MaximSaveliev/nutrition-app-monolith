@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { Paperclip, X, Upload, NotebookPen, NotepadText, Clock, ChartColumn, Utensils, Earth, ChefHat } from "lucide-react";
 import confetti from "canvas-confetti";
+import { API_URL } from "@/lib/config";
 
 const DIETARY_RESTRICTIONS = [
   { value: "vegetarian", label: "Vegetarian" },
@@ -112,7 +113,7 @@ export function RecipeGenerator() {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`http://localhost:8000/api/recipes/generate-from-input`, {
+      const response = await fetch(`${API_URL}/recipes/generate-from-input`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -164,7 +165,7 @@ export function RecipeGenerator() {
       }
 
       if (savedRecipeId) {
-        const response = await fetch(`http://localhost:8000/api/recipes/${savedRecipeId}`, {
+        const response = await fetch(`${API_URL}/recipes/${savedRecipeId}`, {
           method: "PUT",
           headers: {
             "Authorization": `Bearer ${token}`,

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 import { Gift } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 interface RateLimitStatus {
   authenticated: boolean;
@@ -37,7 +38,7 @@ export function RateLimitBanner() {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const response = await fetch("http://localhost:8000/api/nutrition/rate-limit-status", {
+      const response = await fetch(`${API_URL}/nutrition/rate-limit-status`, {
         headers,
       });
 
