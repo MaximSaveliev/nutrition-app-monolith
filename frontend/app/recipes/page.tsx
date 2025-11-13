@@ -3,14 +3,37 @@ import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Clock, Users, Flame, Plus, Beef, Apple, Droplet, Wheat, Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { Clock, Users, Flame, Plus, Beef, Apple, Droplet, Wheat, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { API_URL } from "@/lib/config";
 
 const RECIPES_PER_BATCH = 6;
+
+interface Ingredient {
+  name: string;
+  quantity: string;
+  optional: boolean;
+}
+
+interface Step {
+  step_number: number;
+  instruction: string;
+  duration_minutes: number;
+}
+
+interface Nutrition {
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  fiber_g?: number;
+  sugar_g?: number;
+  sodium_mg?: number;
+  cholesterol_mg?: number;
+}
 
 interface Recipe {
   id: string;
@@ -23,16 +46,15 @@ interface Recipe {
   cuisine_type?: string;
   dietary_restrictions?: string[];
   author_nickname?: string;
-  nutrition: {
-    calories: number;
-    protein_g: number;
-    carbs_g: number;
-    fat_g: number;
-  };
+  ingredients?: Ingredient[];
+  steps?: Step[];
+  nutrition: Nutrition;
 }
 
-export default function RecipesPage() {
+function RecipesContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const recipeId = searchParams.get('id');
   const { user, loading: authLoading } = useAuth();
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
   const [displayedRecipes, setDisplayedRecipes] = useState<Recipe[]>([]);
@@ -40,6 +62,39 @@ export default function RecipesPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [showMyRecipes, setShowMyRecipes] = useState(false);
   const [currentBatch, setCurrentBatch] = useState(1);
+  const [singleRecipe, setSingleRecipe] = useState<Recipe | null>(null);
+  const [recipeLoading, setRecipeLoading] = useState(false);
+  const [recipeError, setRecipeError] = useState<string | null>(null);
+
+  // Fetch single recipe if ID is in query params
+  useEffect(() => {
+    if (!recipeId) {
+      setSingleRecipe(null);
+      setRecipeError(null);
+      return;
+    }
+
+    const token = localStorage.getItem("access_token");
+    setRecipeLoading(true);
+    setRecipeError(null);
+
+    fetch(`${API_URL}/recipes/${recipeId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Recipe not found');
+        return res.json();
+      })
+      .then((data) => {
+        setSingleRecipe(data);
+        setRecipeLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching recipe:", err);
+        setRecipeError("Recipe not found");
+        setRecipeLoading(false);
+      });
+  }, [recipeId]);
 
   // Redirect if not logged in (after auth check completes)
   useEffect(() => {
@@ -95,6 +150,192 @@ export default function RecipesPage() {
     hard: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
   };
 
+  // Show single recipe view if ID is provided
+  if (recipeId) {
+    if (recipeLoading) {
+      return (
+        <div className="min-h-screen flex flex-col">
+          <AppHeader />
+          <main className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </main>
+        </div>
+      );
+    }
+
+    if (recipeError || !singleRecipe) {
+      return (
+        <div className="min-h-screen flex flex-col">
+          <AppHeader />
+          <main className="flex-1 container mx-auto px-4 py-8">
+            <div className="max-w-4xl mx-auto text-center">
+              <Wheat className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+              <h2 className="text-2xl font-bold mb-2">{recipeError || "Recipe not found"}</h2>
+              <Button onClick={() => router.push("/recipes")}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Recipes
+              </Button>
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    const totalTime = singleRecipe.prep_time_minutes + singleRecipe.cook_time_minutes;
+
+    return (
+      <div className="min-h-screen flex flex-col">
+        <AppHeader />
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <Button variant="ghost" onClick={() => router.push("/recipes")}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+
+            <div>
+              <h1 className="text-4xl font-bold mb-2">{singleRecipe.title}</h1>
+              {singleRecipe.description && (
+                <p className="text-lg text-muted-foreground">{singleRecipe.description}</p>
+              )}
+              {singleRecipe.author_nickname && (
+                <p className="text-sm text-muted-foreground mt-2">By {singleRecipe.author_nickname}</p>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4" />
+                <span>{totalTime} min ({singleRecipe.prep_time_minutes} prep + {singleRecipe.cook_time_minutes} cook)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Users className="h-4 w-4" />
+                <span>{singleRecipe.servings} servings</span>
+              </div>
+              <Badge variant="secondary" className={`capitalize ${difficultyColors[singleRecipe.difficulty.toLowerCase()] || ''}`}>
+                {singleRecipe.difficulty}
+              </Badge>
+              {singleRecipe.cuisine_type && (
+                <Badge variant="outline" className="capitalize">{singleRecipe.cuisine_type}</Badge>
+              )}
+              {singleRecipe.dietary_restrictions && singleRecipe.dietary_restrictions.length > 0 && (
+                singleRecipe.dietary_restrictions.map((restriction, idx) => (
+                  <Badge key={idx} variant="outline" className="capitalize">
+                    {restriction.replace(/_/g, ' ')}
+                  </Badge>
+                ))
+              )}
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Nutrition per Serving</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="text-center">
+                    <Flame className="h-5 w-5 mx-auto mb-1 text-orange-500" />
+                    <div className="text-lg font-bold">{Math.round(singleRecipe.nutrition.calories)}</div>
+                    <div className="text-xs text-muted-foreground">kcal</div>
+                  </div>
+                  <div className="text-center">
+                    <Beef className="h-5 w-5 mx-auto mb-1 text-red-500" />
+                    <div className="text-lg font-bold">{Math.round(singleRecipe.nutrition.protein_g)}g</div>
+                    <div className="text-xs text-muted-foreground">protein</div>
+                  </div>
+                  <div className="text-center">
+                    <Wheat className="h-5 w-5 mx-auto mb-1 text-green-500" />
+                    <div className="text-lg font-bold">{Math.round(singleRecipe.nutrition.carbs_g)}g</div>
+                    <div className="text-xs text-muted-foreground">carbs</div>
+                  </div>
+                  <div className="text-center">
+                    <Droplet className="h-5 w-5 mx-auto mb-1 text-yellow-500" />
+                    <div className="text-lg font-bold">{Math.round(singleRecipe.nutrition.fat_g)}g</div>
+                    <div className="text-xs text-muted-foreground">fat</div>
+                  </div>
+                </div>
+                {(singleRecipe.nutrition.fiber_g || singleRecipe.nutrition.sugar_g || singleRecipe.nutrition.sodium_mg) && (
+                  <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t">
+                    {singleRecipe.nutrition.fiber_g && (
+                      <div className="text-center">
+                        <div className="text-sm font-semibold">{Math.round(singleRecipe.nutrition.fiber_g)}g</div>
+                        <div className="text-xs text-muted-foreground">Fiber</div>
+                      </div>
+                    )}
+                    {singleRecipe.nutrition.sugar_g && (
+                      <div className="text-center">
+                        <div className="text-sm font-semibold">{Math.round(singleRecipe.nutrition.sugar_g)}g</div>
+                        <div className="text-xs text-muted-foreground">Sugar</div>
+                      </div>
+                    )}
+                    {singleRecipe.nutrition.sodium_mg && (
+                      <div className="text-center">
+                        <div className="text-sm font-semibold">{Math.round(singleRecipe.nutrition.sodium_mg)}mg</div>
+                        <div className="text-xs text-muted-foreground">Sodium</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {singleRecipe.ingredients && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ingredients</CardTitle>
+                  <CardDescription>{singleRecipe.servings} servings</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {singleRecipe.ingredients.map((ingredient, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-primary mt-1">•</span>
+                        <span>
+                          <span className="font-medium">{ingredient.quantity}</span> {ingredient.name}
+                          {ingredient.optional && <span className="text-muted-foreground text-sm ml-1">(optional)</span>}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {singleRecipe.steps && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Instructions</CardTitle>
+                  <CardDescription>Total time: {totalTime} minutes</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ol className="space-y-4">
+                    {singleRecipe.steps.map((step) => (
+                      <li key={step.step_number} className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                          {step.step_number}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm">{step.instruction}</p>
+                          {step.duration_minutes > 0 && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              <Clock className="h-3 w-3 inline mr-1" />
+                              {step.duration_minutes} min
+                            </p>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show list view
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader />
@@ -162,7 +403,7 @@ export default function RecipesPage() {
                 const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes;
                 
                 return (
-                  <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
+                  <Link key={recipe.id} href={`/recipes?id=${recipe.id}`}>
                     <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
                       <CardHeader className="pb-3">
                         <CardTitle className="text-xl line-clamp-2">{recipe.title}</CardTitle>
@@ -281,5 +522,20 @@ export default function RecipesPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function RecipesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col">
+        <AppHeader />
+        <main className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </main>
+      </div>
+    }>
+      <RecipesContent />
+    </Suspense>
   );
 }
