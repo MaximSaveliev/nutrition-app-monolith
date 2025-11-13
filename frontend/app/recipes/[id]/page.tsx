@@ -55,10 +55,18 @@ export default function RecipeDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchRecipe();
+    if (params.id) {
+      fetchRecipe();
+    }
   }, [params.id]);
 
   const fetchRecipe = async () => {
+    if (!params.id) {
+      setError("Recipe ID not found");
+      setLoading(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("access_token");
       const headers: HeadersInit = {
