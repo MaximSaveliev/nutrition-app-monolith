@@ -1,7 +1,7 @@
 "use client";
 import { AppHeader } from "@/components/app-header";
 import { DishAnalyzer } from "@/components/dish-analyzer";
-import { ScanSearch, Sparkles } from "lucide-react";
+import { ScanSearch, Sparkles, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 
 export default function AnalyzeDishPage() {
@@ -12,8 +12,7 @@ export default function AnalyzeDishPage() {
       <div className="min-h-screen flex flex-col">
         <AppHeader />
         <main className="flex-1 flex items-center justify-center">
-          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-lg text-muted-foreground">Loading...</div>
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </main>
       </div>
     );
