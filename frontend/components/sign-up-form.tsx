@@ -53,7 +53,14 @@ export function SignUpForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required disabled={loading} />
+            <Input 
+              id="email" 
+              name="email" 
+              type="email" 
+              required 
+              disabled={loading}
+              placeholder="you@example.com"
+            />
           </div>
           <div>
             <Label htmlFor="nickname">Nickname</Label>
@@ -72,12 +79,27 @@ export function SignUpForm() {
           </div>
           <div>
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" minLength={8} required disabled={loading} />
+            <Input 
+              id="password" 
+              name="password" 
+              type="password" 
+              minLength={8} 
+              required 
+              disabled={loading}
+              placeholder="Min 8 characters"
+            />
             <p className="text-xs text-muted-foreground mt-1">Min 8 chars, 1 uppercase, 1 digit</p>
           </div>
           <div>
             <Label htmlFor="repeat">Confirm Password</Label>
-            <Input id="repeat" name="repeat" type="password" required disabled={loading} />
+            <Input 
+              id="repeat" 
+              name="repeat" 
+              type="password" 
+              required 
+              disabled={loading}
+              placeholder="Re-enter your password"
+            />
           </div>
           {error && <div className="text-sm text-red-600">{error}</div>}
           <Button type="submit" className="w-full" disabled={loading}>

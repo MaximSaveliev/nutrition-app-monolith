@@ -155,7 +155,7 @@ export function PublicRecipes() {
         const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes;
         
         return (
-          <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
+          <Link key={recipe.id} href={`/recipes?id=${recipe.id}`}>
             <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
               <CardHeader className="pb-3">
                 <CardTitle className="text-xl line-clamp-2">{recipe.title}</CardTitle>

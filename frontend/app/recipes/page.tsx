@@ -66,7 +66,7 @@ function RecipesContent() {
   const [recipeLoading, setRecipeLoading] = useState(false);
   const [recipeError, setRecipeError] = useState<string | null>(null);
 
-  // Fetch single recipe if ID is in query params
+  // Fetch single recipe if ID is in query params (no auth required)
   useEffect(() => {
     if (!recipeId) {
       setSingleRecipe(null);
@@ -74,13 +74,10 @@ function RecipesContent() {
       return;
     }
 
-    const token = localStorage.getItem("access_token");
     setRecipeLoading(true);
     setRecipeError(null);
 
-    fetch(`${API_URL}/recipes/${recipeId}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
+    fetch(`${API_URL}/recipes/${recipeId}`)
       .then((res) => {
         if (!res.ok) throw new Error('Recipe not found');
         return res.json();
@@ -96,27 +93,27 @@ function RecipesContent() {
       });
   }, [recipeId]);
 
-  // Redirect if not logged in (after auth check completes)
+  // Fetch recipes list (public recipes don't require auth)
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/auth/login");
-    }
-  }, [authLoading, user, router]);
-
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
     setLoading(true);
     setCurrentBatch(1); // Reset batch when switching tabs
 
+    const token = localStorage.getItem("access_token");
+    
+    // If trying to view "My Recipes" without auth, switch to community view
+    if (showMyRecipes && !token) {
+      setShowMyRecipes(false);
+      return;
+    }
+
     // Fetch recipes
     const url = `${API_URL}/recipes?my_recipes=${showMyRecipes}`;
-    fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const fetchOptions: RequestInit = {};
+    if (token) {
+      fetchOptions.headers = { Authorization: `Bearer ${token}` };
+    }
+    
+    fetch(url, fetchOptions)
       .then((res) => res.json())
       .then((data) => {
         setAllRecipes(data || []);
@@ -127,7 +124,7 @@ function RecipesContent() {
         console.error("Error fetching recipes:", err);
         setLoading(false);
       });
-  }, [showMyRecipes]);
+  }, [showMyRecipes, user]);
 
   const loadMoreRecipes = () => {
     setLoadingMore(true);
@@ -357,12 +354,14 @@ function RecipesContent() {
                 <Users className="h-4 w-4 mr-2" />
                 Community
               </Button>
-              <Button
-                variant={showMyRecipes ? "default" : "outline"}
-                onClick={() => setShowMyRecipes(true)}
-              >
-                My Recipes
-              </Button>
+              {user && (
+                <Button
+                  variant={showMyRecipes ? "default" : "outline"}
+                  onClick={() => setShowMyRecipes(true)}
+                >
+                  My Recipes
+                </Button>
+              )}
             </div>
           </div>
 

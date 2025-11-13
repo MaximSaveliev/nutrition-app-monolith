@@ -123,10 +123,10 @@ export function AppHeader() {
                   </Link>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start gap-3 px-4 py-3 h-auto text-base hover:bg-destructive/10 hover:text-destructive"
+                    className="w-full justify-start gap-3 px-4 py-3 h-auto text-base"
                     onClick={handleLogout}
                   >
-                    <div className="h-9 w-9 rounded-md bg-destructive/5 flex items-center justify-center">
+                    <div className="h-9 w-9 rounded-md flex items-center justify-center">
                       <LogOut className="h-5 w-5" />
                     </div>
                     <span className="font-medium">Logout</span>

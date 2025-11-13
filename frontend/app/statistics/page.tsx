@@ -542,7 +542,7 @@ export default function StatisticsPage() {
                       color: "hsl(24, 95%, 53%)",
                     },
                   }}
-                  className="h-[280px] w-full"
+                  className="h-[280px] w-full [&_.recharts-wrapper]:outline-none [&_.recharts-wrapper]:focus:outline-none [&_*]:outline-none [&_*]:focus:outline-none"
                 >
                   <BarChart
                     accessibilityLayer
