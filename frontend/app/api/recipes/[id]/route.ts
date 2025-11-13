@@ -4,12 +4,13 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:800
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const authHeader = request.headers.get("authorization");
   
   try {
-    const url = `${BACKEND_URL}/api/recipes/${params.id}`;
+    const url = `${BACKEND_URL}/api/recipes/${id}`;
     
     const headers: HeadersInit = {
       "Content-Type": "application/json",

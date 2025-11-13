@@ -51,25 +51,10 @@ export default function RecipeDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch user
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      fetch("/api/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => setUser(data))
-        .catch(() => {});
-    }
-
-    // Fetch recipe
     fetchRecipe();
   }, [params.id]);
 
@@ -103,7 +88,7 @@ export default function RecipeDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <AppHeader user={user} />
+        <AppHeader />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-lg text-muted-foreground">Loading...</div>
         </main>
@@ -114,7 +99,7 @@ export default function RecipeDetailPage() {
   if (error || !recipe) {
     return (
       <div className="min-h-screen flex flex-col">
-        <AppHeader user={user} />
+        <AppHeader />
         <main className="flex-1 container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto text-center">
             <Wheat className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
@@ -139,7 +124,7 @@ export default function RecipeDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <AppHeader user={user} />
+      <AppHeader />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
