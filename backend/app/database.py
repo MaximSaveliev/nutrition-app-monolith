@@ -1,11 +1,17 @@
+"""
+Pattern: Singleton (Creational)
+Single database connection manager shared across application
+"""
 from typing import Optional
 from supabase import Client, create_client
 from app.config import get_settings
 
 
 class DatabaseManager:
-    """Pattern: Singleton - Single database connection instance"""
-    
+    """
+    Pattern: Singleton (Creational)
+    Ensures single Supabase client instance to avoid connection overhead
+    """
     _instance: Optional["DatabaseManager"] = None
     _client: Optional[Client] = None
     _admin_client: Optional[Client] = None
@@ -23,12 +29,15 @@ class DatabaseManager:
 
     @property
     def client(self) -> Client:
+        """Regular client for standard operations"""
         return self._client
 
     @property
     def admin_client(self) -> Client:
+        """Admin client with elevated privileges"""
         return self._admin_client
 
 
 def get_database() -> DatabaseManager:
+    """Factory function for database dependency injection"""
     return DatabaseManager()

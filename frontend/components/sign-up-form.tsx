@@ -1,3 +1,9 @@
+/**
+ * SignUpForm Component
+ * 
+ * Controlled Form Component - Handles user registration
+ * Validates password matching and enforces password strength requirements
+ */
 "use client";
 import { signup } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -18,6 +24,7 @@ export function SignUpForm() {
     
     const form = e.currentTarget;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const nickname = (form.elements.namedItem("nickname") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     const repeat = (form.elements.namedItem("repeat") as HTMLInputElement).value;
 
@@ -28,7 +35,7 @@ export function SignUpForm() {
     }
 
     try {
-      await signup(email, password, repeat);
+      await signup(email, password, repeat, nickname);
       window.location.href = "/auth/sign-up-success";
     } catch (err: any) {
       setError(err.message);
@@ -47,6 +54,21 @@ export function SignUpForm() {
           <div>
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" type="email" required disabled={loading} />
+          </div>
+          <div>
+            <Label htmlFor="nickname">Nickname</Label>
+            <Input 
+              id="nickname" 
+              name="nickname" 
+              type="text" 
+              minLength={3} 
+              maxLength={50}
+              pattern="[a-zA-Z0-9_-]+"
+              required 
+              disabled={loading} 
+              placeholder="e.g., ChefMaster"
+            />
+            <p className="text-xs text-muted-foreground mt-1">3-50 characters (letters, numbers, _, -)</p>
           </div>
           <div>
             <Label htmlFor="password">Password</Label>

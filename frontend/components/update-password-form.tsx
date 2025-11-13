@@ -1,3 +1,9 @@
+/**
+ * UpdatePasswordForm Component
+ * 
+ * Controlled Form Component - Handles password reset completion
+ * Extracts reset token from URL hash and validates passwords match
+ */
 "use client";
 import { resetPassword } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -16,7 +22,6 @@ export function UpdatePasswordForm() {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // Supabase sends token in URL hash after redirect
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.substring(1));
     const accessToken = params.get("access_token");
@@ -51,8 +56,6 @@ export function UpdatePasswordForm() {
 
     try {
       await resetPassword(token, password, repeat);
-      
-      // Redirect to login with success message
       router.push("/auth/login?password_reset=success");
     } catch (err: any) {
       setError(err.message);

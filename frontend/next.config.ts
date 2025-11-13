@@ -2,6 +2,22 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /**
+   * Image Configuration
+   * 
+   * Allow images from Supabase storage
+   */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'owpnfvlxwtaphbhosugb.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
+  
+  /**
    * API Route Rewrites
    * 
    * Development: Proxy /api/* requests to local FastAPI backend (port 8000)

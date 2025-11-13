@@ -1,3 +1,9 @@
+/**
+ * AuthButton Component (Deprecated)
+ * 
+ * Legacy component - replaced by AppHeader and AuthContext
+ * Kept for backward compatibility with existing pages
+ */
 "use client";
 import Link from "next/link";
 import { Button } from "./ui/button";

@@ -1,3 +1,9 @@
+/**
+ * LoginForm Component
+ * 
+ * Controlled Form Component - Handles user authentication
+ * Displays success messages for password resets and email confirmations
+ */
 "use client";
 import { login } from "@/lib/api";
 import { Button } from "@/components/ui/button";

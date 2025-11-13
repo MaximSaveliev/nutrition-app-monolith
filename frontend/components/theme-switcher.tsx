@@ -1,3 +1,9 @@
+/**
+ * ThemeSwitcher Component
+ * 
+ * UI Control Component - Provides theme selection dropdown (light/dark/system)
+ * Uses next-themes for persistent theme management
+ */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +22,6 @@ const ThemeSwitcher = () => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
-  // useEffect only runs on the client, so now we can safely show the UI
   useEffect(() => {
     setMounted(true);
   }, []);

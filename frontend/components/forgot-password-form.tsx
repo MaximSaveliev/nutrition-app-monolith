@@ -1,3 +1,9 @@
+/**
+ * ForgotPasswordForm Component
+ * 
+ * Controlled Form Component - Handles password reset requests
+ * Displays success state with retry option on completion
+ */
 "use client";
 import { forgotPassword } from "@/lib/api";
 import { Button } from "@/components/ui/button";

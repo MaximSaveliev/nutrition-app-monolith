@@ -1,19 +1,30 @@
+"""
+FastAPI Application Entry Point
+Pattern: Factory (Creational) - Application factory creates configured FastAPI instance
+"""
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth_router
+from app.api.recipes import router as recipes_router
+from app.api.nutrition import router as nutrition_router
+from app.api.admin import router as admin_router
 from app.config import get_settings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Application lifecycle management"""
     print("🚀 Starting FastAPI application...")
     yield
     print("👋 Shutting down FastAPI application...")
 
 
 def create_application() -> FastAPI:
-    """Pattern: Factory - Creates and configures FastAPI application"""
+    """
+    Pattern: Factory (Creational)
+    Creates and configures FastAPI application with all dependencies
+    """
     settings = get_settings()
 
     app = FastAPI(
@@ -35,6 +46,9 @@ def create_application() -> FastAPI:
     )
 
     app.include_router(auth_router, prefix=settings.api_prefix)
+    app.include_router(recipes_router, prefix=settings.api_prefix)
+    app.include_router(nutrition_router, prefix=settings.api_prefix)
+    app.include_router(admin_router, prefix=settings.api_prefix)
 
     @app.get("/")
     async def root():

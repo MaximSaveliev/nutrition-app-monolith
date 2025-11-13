@@ -1,4 +1,7 @@
-import os
+"""
+Pattern: Singleton (Creational)
+Ensures single Settings instance across application lifecycle
+"""
 from functools import lru_cache
 from typing import Optional
 from pydantic import Field
@@ -6,6 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Application configuration with environment variable loading"""
     supabase_url: str
     supabase_key: str = Field(validation_alias="supabase_anon_key")
     supabase_service_key: str = Field(validation_alias="supabase_service_role_key")
@@ -28,7 +32,7 @@ class Settings(BaseSettings):
     )
     
     def get_base_url(self) -> str:
-        """Pattern: Dynamic URL resolution for multi-environment deployment"""
+        """Resolve base URL for current environment"""
         if self.frontend_url:
             return self.frontend_url
         if self.vercel_url:
@@ -38,5 +42,8 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> Settings:
-    """Pattern: Singleton - Single configuration instance"""
+    """
+    Pattern: Singleton (Creational)
+    Returns single Settings instance using lru_cache
+    """
     return Settings()
