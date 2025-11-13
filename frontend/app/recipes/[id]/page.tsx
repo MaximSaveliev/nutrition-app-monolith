@@ -1,16 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Apple, Flame, Beef, Droplet, ArrowLeft, Wheat } from "lucide-react";
+import { Clock, Users, Flame, Beef, Droplet, ArrowLeft, Wheat } from "lucide-react";
+import Link from "next/link";
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';
-export const dynamicParams = true;
 
 interface Ingredient {
   name: string;
@@ -51,79 +48,37 @@ interface Recipe {
   nutrition: Nutrition;
 }
 
-export default function RecipeDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+async function getRecipe(id: string): Promise<Recipe | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+    const response = await fetch(`${baseUrl}/api/recipes/${id}`, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  useEffect(() => {
-    if (params.id) {
-      fetchRecipe();
-    }
-  }, [params.id]);
-
-  const fetchRecipe = async () => {
-    if (!params.id) {
-      setError("Recipe ID not found");
-      setLoading(false);
-      return;
+    if (!response.ok) {
+      return null;
     }
 
-    try {
-      const token = localStorage.getItem("access_token");
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-      
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`/api/recipes/${params.id}`, { headers });
-
-      if (response.ok) {
-        const data = await response.json();
-        setRecipe(data);
-      } else {
-        setError("Recipe not found");
-      }
-    } catch (err) {
-      console.error("Error fetching recipe:", err);
-      setError("Failed to load recipe");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <AppHeader />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-lg text-muted-foreground">Loading...</div>
-        </main>
-      </div>
-    );
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching recipe:', error);
+    return null;
   }
+}
 
-  if (error || !recipe) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <AppHeader />
-        <main className="flex-1 container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <Wheat className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-bold mb-2">{error || "Recipe not found"}</h2>
-            <Button onClick={() => router.push("/recipes")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Recipes
-            </Button>
-          </div>
-        </main>
-      </div>
-    );
+export default async function RecipeDetailPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  const { id } = await params;
+  const recipe = await getRecipe(id);
+
+  if (!recipe) {
+    notFound();
   }
 
   const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes;
@@ -141,10 +96,12 @@ export default function RecipeDetailPage() {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Back Button */}
-          <Button variant="ghost" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
+          <Link href="/recipes">
+            <Button variant="ghost">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </Link>
 
           {/* Recipe Header */}
           <div>
