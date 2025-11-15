@@ -233,25 +233,27 @@ export function DishAnalyzer() {
                   </div>
 
                   {(result.nutrition.fiber_g != null || result.nutrition.sugar_g != null || result.nutrition.sodium_mg != null) && (
-                    <div className="grid grid-cols-3 gap-2 text-sm pt-2 border-t">
-                      {result.nutrition.fiber_g != null && (
-                        <div className="text-center py-2">
-                          <div className="font-bold">{result.nutrition.fiber_g}g</div>
-                          <div className="text-xs text-muted-foreground">Fiber</div>
-                        </div>
-                      )}
-                      {result.nutrition.sugar_g != null && (
-                        <div className="text-center py-2">
-                          <div className="font-bold">{result.nutrition.sugar_g}g</div>
-                          <div className="text-xs text-muted-foreground">Sugar</div>
-                        </div>
-                      )}
-                      {result.nutrition.sodium_mg != null && (
-                        <div className="text-center py-2">
-                          <div className="font-bold">{result.nutrition.sodium_mg}mg</div>
-                          <div className="text-xs text-muted-foreground">Sodium</div>
-                        </div>
-                      )}
+                    <div className="bg-muted/30 rounded-xl p-4">
+                      <div className="grid grid-cols-3 gap-3">
+                        {result.nutrition.fiber_g != null && (
+                          <div className="text-center py-2 bg-background rounded-lg">
+                            <div className="font-bold">{result.nutrition.fiber_g}g</div>
+                            <div className="text-xs text-muted-foreground font-medium mt-1">Fiber</div>
+                          </div>
+                        )}
+                        {result.nutrition.sugar_g != null && (
+                          <div className="text-center py-2 bg-background rounded-lg">
+                            <div className="font-bold">{result.nutrition.sugar_g}g</div>
+                            <div className="text-xs text-muted-foreground font-medium mt-1">Sugar</div>
+                          </div>
+                        )}
+                        {result.nutrition.sodium_mg != null && (
+                          <div className="text-center py-2 bg-background rounded-lg">
+                            <div className="font-bold">{result.nutrition.sodium_mg}mg</div>
+                            <div className="text-xs text-muted-foreground font-medium mt-1">Sodium</div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -259,7 +261,7 @@ export function DishAnalyzer() {
                     result.nutrition.vitamin_e_mg != null || result.nutrition.vitamin_k_mcg != null || result.nutrition.vitamin_b6_mg != null || 
                     result.nutrition.vitamin_b12_mcg != null || result.nutrition.folate_mcg != null) && (
                     <div className="border-t pt-4">
-                      <h4 className="font-semibold mb-3 text-sm text-muted-foreground">Vitamins</h4>
+                      <h4 className="font-bold text-base mb-3 text-purple-700 dark:text-purple-400">Vitamins</h4>
                       <div className="grid grid-cols-4 gap-2">
                         {result.nutrition.vitamin_a_mcg != null && (
                           <div className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded text-center">
@@ -317,7 +319,7 @@ export function DishAnalyzer() {
                     result.nutrition.zinc_mg != null || result.nutrition.selenium_mcg != null || result.nutrition.potassium_mg != null || 
                     result.nutrition.cholesterol_mg != null) && (
                     <div className="border-t pt-4">
-                      <h4 className="font-semibold mb-3 text-sm text-muted-foreground">Minerals</h4>
+                      <h4 className="font-bold text-base mb-3 text-emerald-700 dark:text-emerald-400">Minerals</h4>
                       <div className="grid grid-cols-3 gap-2">
                         {result.nutrition.calcium_mg != null && (
                           <div className="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded text-center">

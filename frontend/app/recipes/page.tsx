@@ -160,19 +160,30 @@ function RecipesContent() {
       );
     }
 
-    if (recipeError || !singleRecipe) {
+    if (recipeError) {
       return (
         <div className="min-h-screen flex flex-col">
           <AppHeader />
           <main className="flex-1 container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
               <Wheat className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h2 className="text-2xl font-bold mb-2">{recipeError || "Recipe not found"}</h2>
+              <h2 className="text-2xl font-bold mb-2">{recipeError}</h2>
               <Button onClick={() => router.push("/recipes")}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Recipes
               </Button>
             </div>
+          </main>
+        </div>
+      );
+    }
+
+    if (!singleRecipe) {
+      return (
+        <div className="min-h-screen flex flex-col">
+          <AppHeader />
+          <main className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </main>
         </div>
       );
