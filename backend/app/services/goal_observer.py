@@ -5,7 +5,7 @@ Goal achievement tracking with notification system
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 from uuid import UUID
-from datetime import date
+from datetime import date, datetime, timedelta
 import logging
 
 logger = logging.getLogger(__name__)
@@ -101,6 +101,9 @@ class ToastNotificationObserver(GoalObserver):
     
     def get_notifications(self, user_id: UUID, unread_only: bool = True) -> List[Dict[str, Any]]:
         """Get notifications for user"""
+        # Cleanup old notifications before returning
+        self._cleanup_old_notifications(user_id)
+        
         if user_id not in self.notifications:
             return []
         
@@ -122,6 +125,57 @@ class ToastNotificationObserver(GoalObserver):
         """Clear all notifications for user"""
         if user_id in self.notifications:
             self.notifications[user_id] = []
+    
+    def _cleanup_old_notifications(self, user_id: UUID):
+        """
+        Automatic cleanup of old notifications:
+        - Delete read notifications older than 7 days
+        - Keep maximum 10 notifications per user (delete oldest read ones first)
+        """
+        if user_id not in self.notifications:
+            return
+        
+        current_notifications = self.notifications[user_id]
+        if not current_notifications:
+            return
+        
+        # Step 1: Remove read notifications older than 7 days
+        seven_days_ago = datetime.now() - timedelta(days=7)
+        
+        filtered_notifications = []
+        removed_count = 0
+        
+        for notification in current_notifications:
+            created_at = datetime.fromisoformat(notification['created_at'])
+            is_old = created_at < seven_days_ago
+            is_read = notification['read']
+            
+            # Keep if: unread OR read but less than 7 days old
+            if not is_read or not is_old:
+                filtered_notifications.append(notification)
+            else:
+                removed_count += 1
+        
+        # Step 2: Enforce maximum limit (keep last 10 notifications)
+        MAX_NOTIFICATIONS = 10
+        if len(filtered_notifications) > MAX_NOTIFICATIONS:
+            # Sort by created_at, keep newest
+            filtered_notifications.sort(key=lambda n: n['created_at'], reverse=True)
+            
+            # Prioritize keeping unread notifications
+            unread = [n for n in filtered_notifications if not n['read']]
+            read = [n for n in filtered_notifications if n['read']]
+            
+            # Keep all unread + fill remaining slots with read
+            remaining_slots = MAX_NOTIFICATIONS - len(unread)
+            filtered_notifications = unread + read[:remaining_slots]
+            
+            removed_count += len(current_notifications) - removed_count - len(filtered_notifications)
+        
+        if removed_count > 0:
+            logger.info(f"Cleaned up {removed_count} old notifications for user {user_id}")
+        
+        self.notifications[user_id] = filtered_notifications
 
 
 class LoggingObserver(GoalObserver):

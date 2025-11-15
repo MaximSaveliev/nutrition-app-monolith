@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import { Clock, Users, Flame, Plus, Beef, Apple, Droplet, Wheat, Loader2, ArrowLeft } from "lucide-react";
+import { Clock, Users, Flame, Plus, Beef, Apple, Droplet, Wheat, Loader2, ArrowLeft, Earth, EarthLock } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { API_URL } from "@/lib/config";
+import confetti from "canvas-confetti";
 
 const RECIPES_PER_BATCH = 6;
 
@@ -45,7 +46,11 @@ interface Recipe {
   difficulty: string;
   cuisine_type?: string;
   dietary_restrictions?: string[];
+  spice_level?: string;
   author_nickname?: string;
+  author_id?: string;
+  is_public?: boolean;
+  image_url?: string;
   ingredients?: Ingredient[];
   steps?: Step[];
   nutrition: Nutrition;
@@ -55,18 +60,19 @@ function RecipesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const recipeId = searchParams.get('id');
+  const tabParam = searchParams.get('tab');
   const { user, loading: authLoading } = useAuth();
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
   const [displayedRecipes, setDisplayedRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [showMyRecipes, setShowMyRecipes] = useState(false);
+  const [showMyRecipes, setShowMyRecipes] = useState(tabParam === 'my-recipes');
   const [currentBatch, setCurrentBatch] = useState(1);
   const [singleRecipe, setSingleRecipe] = useState<Recipe | null>(null);
   const [recipeLoading, setRecipeLoading] = useState(false);
   const [recipeError, setRecipeError] = useState<string | null>(null);
+  const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
 
-  // Fetch single recipe if ID is in query params (no auth required)
   useEffect(() => {
     if (!recipeId) {
       setSingleRecipe(null);
@@ -77,7 +83,13 @@ function RecipesContent() {
     setRecipeLoading(true);
     setRecipeError(null);
 
-    fetch(`${API_URL}/recipes/${recipeId}`)
+    const token = localStorage.getItem("access_token");
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    fetch(`${API_URL}/recipes/${recipeId}`, { headers })
       .then((res) => {
         if (!res.ok) throw new Error('Recipe not found');
         return res.json();
@@ -93,20 +105,17 @@ function RecipesContent() {
       });
   }, [recipeId]);
 
-  // Fetch recipes list (public recipes don't require auth)
   useEffect(() => {
     setLoading(true);
-    setCurrentBatch(1); // Reset batch when switching tabs
+    setCurrentBatch(1);
 
     const token = localStorage.getItem("access_token");
     
-    // If trying to view "My Recipes" without auth, switch to community view
     if (showMyRecipes && !token) {
       setShowMyRecipes(false);
       return;
     }
 
-    // Fetch recipes
     const url = `${API_URL}/recipes?my_recipes=${showMyRecipes}`;
     const fetchOptions: RequestInit = {};
     if (token) {
@@ -125,6 +134,68 @@ function RecipesContent() {
         setLoading(false);
       });
   }, [showMyRecipes, user]);
+
+  const handleToggleVisibility = async () => {
+    if (!singleRecipe || !user) return;
+
+    setIsTogglingVisibility(true);
+    const token = localStorage.getItem("access_token");
+    
+    if (!token) {
+      setIsTogglingVisibility(false);
+      return;
+    }
+
+    const newVisibility = !singleRecipe.is_public;
+
+    try {
+      const updateData = {
+        title: singleRecipe.title,
+        description: singleRecipe.description,
+        ingredients: singleRecipe.ingredients,
+        steps: singleRecipe.steps,
+        cuisine_type: singleRecipe.cuisine_type,
+        dietary_restrictions: singleRecipe.dietary_restrictions,
+        spice_level: singleRecipe.spice_level,
+        difficulty: singleRecipe.difficulty,
+        prep_time_minutes: singleRecipe.prep_time_minutes,
+        cook_time_minutes: singleRecipe.cook_time_minutes,
+        servings: singleRecipe.servings,
+        nutrition: singleRecipe.nutrition,
+        is_public: newVisibility,
+        image_url: singleRecipe.image_url,
+      };
+
+      const response = await fetch(`${API_URL}/recipes/${singleRecipe.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update recipe visibility");
+      }
+
+      const updatedRecipe = await response.json();
+      setSingleRecipe(updatedRecipe);
+
+      if (newVisibility) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#22c55e', '#10b981', '#4ade80', '#86efac'],
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling visibility:", error);
+    } finally {
+      setIsTogglingVisibility(false);
+    }
+  };
 
   const loadMoreRecipes = () => {
     setLoadingMore(true);
@@ -196,10 +267,54 @@ function RecipesContent() {
         <AppHeader />
         <main className="flex-1 container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto space-y-6">
-            <Button variant="ghost" onClick={() => router.push("/recipes")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
+            <div className="flex items-center justify-between">
+              <Button variant="ghost" onClick={() => router.push(`/recipes${showMyRecipes ? '?tab=my-recipes' : ''}`)}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+
+              {user && singleRecipe.author_id === user.id && (
+                <div className="flex items-center gap-2">
+                  {singleRecipe.is_public ? (
+                    <>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border-green-200 dark:border-green-800 pointer-events-none select-none rounded-full h-9 px-3">
+                        <Earth className="h-3 w-3 mr-1" />
+                        Published
+                      </Badge>
+                      <Button
+                        onClick={handleToggleVisibility}
+                        disabled={isTogglingVisibility}
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full h-9"
+                      >
+                        {isTogglingVisibility ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <EarthLock className="h-4 w-4 mr-2" />
+                        )}
+                        Make Private
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      onClick={handleToggleVisibility}
+                      disabled={isTogglingVisibility}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full h-9"
+                    >
+                      {isTogglingVisibility ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Earth className="h-4 w-4 mr-2" />
+                      )}
+                      Make Public
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
 
             <div>
               <h1 className="text-4xl font-bold mb-2">{singleRecipe.title}</h1>
@@ -220,15 +335,15 @@ function RecipesContent() {
                 <Users className="h-4 w-4" />
                 <span>{singleRecipe.servings} servings</span>
               </div>
-              <Badge variant="secondary" className={`capitalize ${difficultyColors[singleRecipe.difficulty.toLowerCase()] || ''}`}>
+              <Badge variant="secondary" className={`capitalize pointer-events-none select-none ${difficultyColors[singleRecipe.difficulty.toLowerCase()] || ''}`}>
                 {singleRecipe.difficulty}
               </Badge>
               {singleRecipe.cuisine_type && (
-                <Badge variant="outline" className="capitalize">{singleRecipe.cuisine_type}</Badge>
+                <Badge variant="outline" className="capitalize pointer-events-none select-none">{singleRecipe.cuisine_type}</Badge>
               )}
               {singleRecipe.dietary_restrictions && singleRecipe.dietary_restrictions.length > 0 && (
                 singleRecipe.dietary_restrictions.map((restriction, idx) => (
-                  <Badge key={idx} variant="outline" className="capitalize">
+                  <Badge key={idx} variant="outline" className="capitalize pointer-events-none select-none">
                     {restriction.replace(/_/g, ' ')}
                   </Badge>
                 ))
@@ -413,7 +528,7 @@ function RecipesContent() {
                 const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes;
                 
                 return (
-                  <Link key={recipe.id} href={`/recipes?id=${recipe.id}`}>
+                  <Link key={recipe.id} href={`/recipes?id=${recipe.id}${showMyRecipes ? '&tab=my-recipes' : ''}`}>
                     <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
                       <CardHeader className="pb-3">
                         <CardTitle className="text-xl line-clamp-2">{recipe.title}</CardTitle>
@@ -460,12 +575,12 @@ function RecipesContent() {
                             <span>{recipe.servings} servings</span>
                           </div>
                           {recipe.difficulty && (
-                            <Badge variant="secondary" className={`capitalize text-xs ${difficultyColors[recipe.difficulty] || ''}`}>
+                            <Badge variant="secondary" className={`capitalize text-xs pointer-events-none select-none ${difficultyColors[recipe.difficulty] || ''}`}>
                               {recipe.difficulty}
                             </Badge>
                           )}
                           {recipe.cuisine_type && (
-                            <Badge variant="outline" className="capitalize text-xs">
+                            <Badge variant="outline" className="capitalize text-xs pointer-events-none select-none">
                               {recipe.cuisine_type}
                             </Badge>
                           )}
@@ -475,12 +590,12 @@ function RecipesContent() {
                         <div className="flex flex-wrap gap-1">
                           {recipe.dietary_restrictions && recipe.dietary_restrictions.length > 0 ? (
                             recipe.dietary_restrictions.map((restriction, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs capitalize">
+                              <Badge key={idx} variant="outline" className="text-xs capitalize pointer-events-none select-none">
                                 {restriction.replace(/_/g, ' ')}
                               </Badge>
                             ))
                           ) : (
-                            <Badge variant="outline" className="text-xs text-muted-foreground">
+                            <Badge variant="outline" className="text-xs text-muted-foreground pointer-events-none select-none">
                               No dietary restrictions
                             </Badge>
                           )}

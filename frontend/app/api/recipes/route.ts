@@ -21,3 +21,25 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function POST(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  
+  try {
+    const body = await request.json();
+    const headers: HeadersInit = { "Content-Type": "application/json" };
+    if (authHeader) headers["Authorization"] = authHeader;
+    
+    const response = await fetch(`${BACKEND_URL}/api/recipes`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body)
+    });
+    
+    const data = await response.json();
+    if (!response.ok) return NextResponse.json(data, { status: response.status });
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to create recipe" }, { status: 500 });
+  }
+}
+

@@ -1,9 +1,6 @@
 /**
- * RecipeGenerator Component
- * 
- * Presentation Component Pattern - Complex stateful component for AI recipe generation
- * Handles both text and image input, dietary restrictions, and recipe publishing
- * Integrates with confetti library for success animations
+ * RecipeGenerator - AI-powered recipe generation component
+ * Supports text and image input, dietary restrictions, and recipe publishing
  */
 "use client";
 import { useState, useRef } from "react";
@@ -46,6 +43,7 @@ export function RecipeGenerator() {
   const [spiceLevel, setSpiceLevel] = useState("");
   const [dietary, setDietary] = useState<string[]>([]);
   const [cookTime, setCookTime] = useState<string>("");
+  const [servings, setServings] = useState<string>("4");
   const [isPublic, setIsPublic] = useState(false);
   const [savedRecipeId, setSavedRecipeId] = useState<string | null>(null);
 
@@ -122,7 +120,7 @@ export function RecipeGenerator() {
           cuisine_preference: cuisine || undefined,
           spice_level: spiceLevel || undefined,
           dietary_restrictions: dietary.length > 0 ? dietary : undefined,
-          servings: 4,
+          servings: servings ? parseInt(servings) : 4,
           cook_time_minutes: cookTime ? parseInt(cookTime) : undefined
         })
       });
@@ -137,12 +135,13 @@ export function RecipeGenerator() {
       }
 
       setRecipe(result);
+      setIsPublic(false);
+      setSavedRecipeId(null);
       
       if (token) {
         try {
           const savedRecipe = await createRecipe({ ...result, is_public: false }, token);
           setSavedRecipeId(savedRecipe.id);
-          console.log("Recipe auto-saved as private with ID:", savedRecipe.id);
         } catch (saveErr) {
           console.error("Auto-save failed:", saveErr);
         }
@@ -341,6 +340,20 @@ export function RecipeGenerator() {
                 value={cookTime}
                 onChange={(e) => setCookTime(e.target.value)}
                 placeholder="Leave empty for any duration"
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="servings">Number of Servings</Label>
+              <Input
+                id="servings"
+                type="number"
+                min="1"
+                max="20"
+                value={servings}
+                onChange={(e) => setServings(e.target.value)}
+                placeholder="4"
                 disabled={loading}
               />
             </div>

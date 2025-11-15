@@ -201,12 +201,12 @@ export function PublicRecipes() {
                     <span>{recipe.servings} servings</span>
                   </div>
                   {recipe.difficulty && (
-                    <Badge variant="secondary" className={`capitalize text-xs ${difficultyColors[recipe.difficulty] || ''}`}>
+                    <Badge variant="secondary" className={`capitalize text-xs pointer-events-none select-none ${difficultyColors[recipe.difficulty] || ''}`}>
                       {recipe.difficulty}
                     </Badge>
                   )}
                   {recipe.cuisine_type && (
-                    <Badge variant="outline" className="capitalize text-xs">
+                    <Badge variant="outline" className="capitalize text-xs pointer-events-none select-none">
                       {recipe.cuisine_type}
                     </Badge>
                   )}
@@ -215,12 +215,12 @@ export function PublicRecipes() {
                 <div className="flex flex-wrap gap-1">
                   {recipe.dietary_restrictions && recipe.dietary_restrictions.length > 0 ? (
                     recipe.dietary_restrictions.map((restriction, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs capitalize">
+                      <Badge key={idx} variant="outline" className="text-xs capitalize pointer-events-none select-none">
                         {restriction.replace(/_/g, ' ')}
                       </Badge>
                     ))
                   ) : (
-                    <Badge variant="outline" className="text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-xs text-muted-foreground pointer-events-none select-none">
                       No dietary restrictions
                     </Badge>
                   )}
