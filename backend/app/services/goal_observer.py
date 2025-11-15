@@ -37,8 +37,20 @@ class ToastNotificationObserver(GoalObserver):
         if user_id not in self.notifications:
             self.notifications[user_id] = []
         
+        notification_id = f"{user_id}_{achievement['goal_type']}_{achievement['date']}"
+        
+        # Check if notification already exists (prevent duplicates)
+        existing_notification = next(
+            (n for n in self.notifications[user_id] if n['id'] == notification_id),
+            None
+        )
+        
+        if existing_notification:
+            logger.debug(f"Notification already exists for user {user_id}: {notification_id}")
+            return
+        
         notification = {
-            "id": f"{user_id}_{achievement['goal_type']}_{achievement['date']}",
+            "id": notification_id,
             "type": "goal_achievement",
             "title": self._get_title(achievement),
             "message": self._get_message(achievement),
